@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  h1 Streamr Ethereum bridge
+
+  .balances.infobox
+    h2 Accounts & Balances
+    table
+      tr
+        th Coinbase
+        td= web3.eth.coinbase
+        td= web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), "ether") + " ETH"
+      each address, i in web3.eth.accounts
+        tr
+          th Account #{i}
+          td= address
+          td= web3.fromWei(web3.eth.getBalance(address), "ether") + " ETH"
+
+  .lastBlock.infobox
+    h2 Lastest block
+    - var lastBlock = web3.eth.getBlock(web3.eth.blockNumber)
+    table
+      each value, key in lastBlock
+        tr
+          th= key
+          td= value
+
+  .blockChain.infobox
+    h2 Blockchain info
+    table
+      each prop in ["mining", "hashrate", "syncing", "gasPrice", "blockNumber"]
+        tr
+          th= prop
+          td= web3.eth[prop]
