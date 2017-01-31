@@ -15,66 +15,52 @@ router.get("/", function (req, res, next) {
     res.render("index", {web3})
 });
 
-/** eth_call to a constant function (doesn't alter blockchain state) */
 router.post("/call", bodyParser.text(), function (req, res, next) {
-    var result = "ERROR"
+    var result = { error: "Unknown error" }
     try {
         var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
-        result = ethCall(req_body.target, req_body.abi, req_body.function, req_body.arguments)
+        result = ethCall(req_body.source, req_body.target, req_body.abi, req_body.function, req_body.arguments, req_body.value)
     } catch (e) {
-        result = "ERROR: " + e
+        result = {error: e.toString()}
     }
-    res.send({result})
+    res.send(result)
 })
 
-function ethCall(targetAddress, abi, functionName, args) {
-    if (typeof targetAddress != "string") { throw "Missing target address!" }
-    if (!abi) { throw "Missing contract interface (abi)!" }
-    if (!functionName) { throw "Missing function name!" }
-    if (!args) { args = [] }
-
-    // check interface is valid for eth_call
-    var interface = _(abi).find(m => m.type === "function" && m.name === functionName)
-    if (!interface) { throw functionName + " not found in ABI!" }
-    if (!interface.constant) { throw functionName + " not marked as 'constant', send transaction instead of calling!" }
-
-    var contract = web3.eth.contract(abi).at(targetAddress.trim())
-    var func = contract[functionName]
-    if (!func) { throw functionName + " not found in contract!" }
-
-    return func.call(...args)
-}
-
-/** eth_sendTransaction */
-router.post("/send", bodyParser.text(), function (req, res, next) {
-    var result = "ERROR"
-    try {
-        var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
-        result = ethCall(req_body.target, req_body.abi, req_body.function, req_body.arguments)
-    } catch (e) {
-        result = "ERROR: " + e
-    }
-    res.send({result})
-})
-
-function ethSend(from, to, abi, functionName, args, value) {
-    if (typeof from != "string") { throw "Missing source address!" }
+function ethCall(from, to, abi, functionName, args, value, gas) {
+    if (typeof from != "string") { from = web3.eth.coinbase }
     if (typeof to != "string") { throw "Missing target address!" }
     if (!abi) { throw "Missing contract interface (abi)!" }
     if (!functionName) { throw "Missing function name!" }
     if (!args) { args = [] }
     if (!value) { value = 0 }
-
-    // check interface is valid for eth_call
-    var interface = _(abi).find(m => m.type === "function" && m.name === functionName)
-    if (!interface) { throw functionName + " not found in ABI!" }
-    if (interface.constant) { throw functionName + " is marked as 'constant', call instead of sending transaction!" }
-
-    var contract = web3.eth.contract(abi).at(targetAddress.trim())
+    if (!gas) { gas = 2000000 }
+    to = to.trim()
+    
+    var contract = web3.eth.contract(abi).at(to)
     var func = contract[functionName]
     if (!func) { throw functionName + " not found in contract!" }
-
-    return func(...args, {from, to, value})
+    
+    var interface = _(abi).find(m => m.type === "function" && m.name === functionName)
+    if (!interface) { throw functionName + " not found in ABI!" }
+    if (interface.constant) {
+        return {result: func.call(...args)}
+    } else {
+        var srcBalanceBefore = web3.eth.getBalance(from)
+        var dstBalanceBefore = web3.eth.getBalance(to)
+        var tx = func(...args, {from, to, value, gas})
+        var srcBalanceAfter = web3.eth.getBalance(from)
+        var dstBalanceAfter = web3.eth.getBalance(to)
+        var t = web3.eth.getTransaction(tx)
+        var tr = web3.eth.getTransactionReceipt(tx)
+        return {
+            valueSent: srcBalanceBefore - srcBalanceAfter,
+            valueReceived: dstBalanceAfter - dstBalanceBefore,
+            gasUsed: +tr.cumulativeGasUsed,
+            gasPrice: +t.gasPrice,
+            blockNumber: +tr.blockNumber,
+            nonce: +t.nonce
+        }
+    }
 }
 
 module.exports = router
