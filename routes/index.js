@@ -3,6 +3,7 @@ var express = require("express")
 
 var Web3 = require("web3")
 var SolidityEvent = require("web3/lib/web3/event.js")
+var SolidityCoder = require("web3/lib/solidity/coder.js");
 var web3 = new Web3()
 web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
 
@@ -22,14 +23,14 @@ router.post("/call", bodyParser.text(), function (req, res, next) {
         var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
         result = ethCall(req_body.source, req_body.target,
             req_body.abi, req_body.function, req_body.arguments,
-            req_body.value, !!req_body.returnEvents)
+            req_body.value)
     } catch (e) {
         result = {error: e.toString()}
     }
     res.send(result)
 })
 
-function ethCall(from, to, abi, functionName, args, value, gas, returnEvents) {
+function ethCall(from, to, abi, functionName, args, value, gas) {
     if (typeof from != "string") { from = web3.eth.coinbase }
     if (typeof to != "string") { throw "Missing target address!" }
     if (!abi) { throw "Missing contract interface (abi)!" }
@@ -50,16 +51,6 @@ function ethCall(from, to, abi, functionName, args, value, gas, returnEvents) {
         if (!_(res).isArray()) { res = [res]; }
         return {results: res}
     } else {
-        events = {}
-        //if (returnEvents) {
-            _(abi).filter(m => m.type === "event").each(m => {
-                m.eventObject = contract[m.name]
-                m.eventHandle = m.eventObject((error, event) => {
-                    if (!events[m.name]) { events[m.name] = {} }
-                    events[m.name] = event.args || {}
-                })
-            })
-        //}
         var srcBalanceBefore = web3.eth.getBalance(from)
         var dstBalanceBefore = web3.eth.getBalance(to)
         var tx = func(...args, {from, to, value, gas})
@@ -67,12 +58,22 @@ function ethCall(from, to, abi, functionName, args, value, gas, returnEvents) {
         var dstBalanceAfter = web3.eth.getBalance(to)
         var t = web3.eth.getTransaction(tx)
         var tr = web3.eth.getTransactionReceipt(tx)
-        // TODO: implement using http://ethereum.stackexchange.com/questions/1381/how-do-i-parse-the-transaction-receipt-log-with-web3-js instead
-        //if (returnEvents) {
-            _(abi).filter(m => m.type === "event").each(m => {
-                m.eventHandle.stopWatching()
-            })
-        //}
+
+        // cryptographic (sha3) signature used to recognize event in transaction receipt -> event
+        eventsBySignature = _(abi)
+            .filter(m => m.type === "event")
+            .map(m => [new SolidityEvent(null, m, null).signature(), m])
+            .fromPairs()
+
+        events = {}
+        _(tr.logs).each(log => {
+            var sig = log.topics[0].replace("0x", "")
+            var event = eventsBySignature.get(sig)
+            var types = event.inputs.map(i => i.type);
+            var rawArgs = log.data.replace("0x", "");
+            events[event.name] = SolidityCoder.decodeParams(types, rawArgs);
+        })
+
         return {
             valueSent: srcBalanceBefore - srcBalanceAfter,
             valueReceived: dstBalanceAfter - dstBalanceBefore,
