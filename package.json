@@ -17,5 +17,8 @@
     "serve-favicon": "~2.3.0",
     "solc": "^0.4.9",
     "web3": "^0.18.2"
+  },
+  "devDependencies": {
+    "restler": "^3.4.0"
   }
 }

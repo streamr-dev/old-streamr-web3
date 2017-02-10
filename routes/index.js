@@ -36,7 +36,8 @@ router.post("/compile", bodyParser.text(), function (req, res, next) {
 })
 
 router.post("/deploy", bodyParser.text(), function (req, res, next) {
-    return deployContracts(req.body).then(result => {
+    var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
+    return deployContracts(req_body.code, req_body.args, req_body.value, req_body.from).then(result => {
         res.send(result)
     }).catch(e => {
         res.send({error: e.toString()})
