@@ -8,6 +8,7 @@ var STREAMR_HTTP_API_URL = "http://localhost:8080/json"
 var Web3 = require("web3")
 var web3 = new Web3()
 web3.setProvider(new web3.providers.HttpProvider(ETHEREUM_CLIENT_URL))
+var Iban = require("web3/lib/web3/iban")
 
 var filter = web3.eth.filter("latest")
 filter.watch(function (error, blockHash) {
@@ -20,8 +21,8 @@ filter.watch(function (error, blockHash) {
             senderAddress: tx.from,
             recipientAddress: tx.to,
             etherSent: +web3.fromWei(tx.value, "ether"),
-            senderBalance: tx.from ? +web3.fromWei(web3.eth.getBalance(tx.from), "ether") : 0,
-            recipientBalance: tx.to ? +web3.fromWei(web3.eth.getBalance(tx.to), "ether") : 0,
+            senderBalance: new Iban(tx.from).isValid() ? +web3.fromWei(web3.eth.getBalance(tx.from), "ether") : 0,
+            recipientBalance: new Iban(tx.to).isValid() ? +web3.fromWei(web3.eth.getBalance(tx.to), "ether") : 0,
             gasUsed: tr.cumulativeGasUsed,
             eventCount: tr.logs.length
         }
@@ -35,7 +36,7 @@ filter.watch(function (error, blockHash) {
             Timestamp: Date.now()
         }
         restler.post(STREAMR_HTTP_API_URL, {headers, data}).on("complete", (result, response) => {
-            if (response.statusCode != 204 && response.statusCode != 200) {
+            if (!response || response.statusCode != 204 && response.statusCode != 200) {
                 console.log(result)     // error probably
             }
         })
