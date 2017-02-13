@@ -5,8 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+var ethCall = require("./src/ethCall")
+var {getAbi, deployContracts} = require("./src/compileContracts")
 
 var app = express();
 
@@ -22,8 +22,61 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/users', users);
+var router = express.Router()
+
+
+
+
+
+/** Status page */
+router.get("/", function (req, res, next) {
+  res.render("index", {web3})
+});
+
+router.post("/profile", function (req, res, next) {
+  res.send({
+    address: web3.eth.coinbase
+  })
+})
+
+router.post("/call", bodyParser.text(), function (req, res, next) {
+  var result = { error: "Unknown error" }
+  try {
+    var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
+    result = ethCall(req_body.source, req_body.target,
+        req_body.abi, req_body.function, req_body.arguments,
+        req_body.value)
+  } catch (e) {
+    result = {error: e.toString()}
+  }
+  res.send(result)
+})
+
+router.post("/compile", bodyParser.text(), function (req, res, next) {
+  var result = { error: "Unknown error" }
+  try {
+    result = getAbi(req.body)
+  } catch (e) {
+    result = {error: e.toString()}
+  }
+  res.send(result)
+})
+
+router.post("/deploy", bodyParser.text(), function (req, res, next) {
+  var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
+  return deployContracts(req_body.code, req_body.args, req_body.value, req_body.from).then(result => {
+    res.send(result)
+  }).catch(e => {
+    res.send({error: e.toString()})
+  })
+})
+
+
+
+
+
+
+app.use('/', router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
