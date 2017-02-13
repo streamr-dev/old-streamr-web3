@@ -2,8 +2,8 @@ var _ = require("lodash")
 var restler = require("restler");
 
 var ETHEREUM_CLIENT_URL = "http://localhost:8545"
-//var STREAMR_HTTP_API_URL = "http://dev-data.streamr/json"
-var STREAMR_HTTP_API_URL = "http://localhost:8080/json"
+var STREAMR_HTTP_API_URL = "http://dev-data.streamr/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data?auth=gZHlcFf-R3mqTzOgN16SXA"
+//var STREAMR_HTTP_API_URL = "https://eth.streamr.com/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data?auth=gZHlcFf-R3mqTzOgN16SXA"
 
 var Web3 = require("web3")
 var web3 = new Web3()
@@ -30,15 +30,12 @@ filter.watch(function (error, blockHash) {
             msg.contractCreated = tr.contractAddress
         }
         var data = JSON.stringify(msg)
-        var headers = {
-            Stream: "tYbq7AIhT0ePKNv1ozPsxQ",
-            Auth: "gZHlcFf-R3mqTzOgN16SXA",
-            Timestamp: Date.now()
-        }
-        restler.post(STREAMR_HTTP_API_URL, {headers, data}).on("complete", (result, response) => {
+        restler.post(STREAMR_HTTP_API_URL, {data}).on("complete", (result, response) => {
             if (!response || response.statusCode != 204 && response.statusCode != 200) {
                 console.log(result)     // error probably
-            }
+            } else {
+		console.log("Success: "+response.statusCode)
+	    }
         })
         process.stdout.write(":")
     })
