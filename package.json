@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "stream": "node ./blocksToStream.js",
+    "watch": "node ./blocksToConsole.js",
+    "console": "node ./startConsole.js"
   },
   "dependencies": {
     "bluebird": "^3.4.7",
@@ -19,6 +22,7 @@
     "web3": "^0.18.2"
   },
   "devDependencies": {
+    "cli-table": "^0.3.1",
     "restler": "^3.4.0"
   }
 }

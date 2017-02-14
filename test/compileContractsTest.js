@@ -51,6 +51,25 @@ describe("getAbi", () => {
         assert.equal(errors.length, 1)
         assert(errors[0].indexOf("Error: Expected import directive or contract definition") > -1)
     })
+
+    it("should include param annotations", () => {
+        var code = `
+/// @dev herp derp
+contract PayByUse {
+    address recipient;
+    uint unitPriceWei;
+    
+    /// @dev unitPrice_ETH ether
+    function PayByUse(address recipientAddress, uint unitPrice_ETH) payable {
+        unitPriceWei = unitPrice_ETH;
+        recipient = recipientAddress;
+    }
+}`
+        // TODO: doesn't work; the relevant userDoc/developerDoc doesn't show up in solc --natspec
+        //   at least not on testrpc, maybe works on geth the real thing?
+        var {contracts, errors} = getAbi(code)
+        //assert(contracts[0].abi[0].inputs[1].conversion, "ether")
+    })
 })
 
 describe("deployContracts", () => {
