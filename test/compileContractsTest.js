@@ -72,8 +72,9 @@ contract PayByUse {
     })
 })
 
-describe("deployContracts", () => {
-    it("should get an address", () => {
+describe("deployContracts", function () {
+    it("should get an address", function () {
+        this.timeout(0)     // disable timeout
         return deployContracts(TEST_CODE).then(res => {
             var {contracts, errors} = res
             assert.equal(contracts.length, 1)
