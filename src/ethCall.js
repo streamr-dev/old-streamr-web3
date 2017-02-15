@@ -27,24 +27,32 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
         if (!_(res).isArray()) { res = [res]; }
         return {results: res}
     } else {
-        var srcBalanceBefore = web3.eth.getBalance(from)
-        var dstBalanceBefore = web3.eth.getBalance(to)
-        var tx = func(...args, {from, to, value, gas})
-        var srcBalanceAfter = web3.eth.getBalance(from)
-        var dstBalanceAfter = web3.eth.getBalance(to)
-        var t = web3.eth.getTransaction(tx)
-        var tr = web3.eth.getTransactionReceipt(tx)
+        return new Promise((done, fail) => {
+            var srcBalanceBefore = web3.eth.getBalance(from)
+            var dstBalanceBefore = web3.eth.getBalance(to)
+            var tx = func.sendTransaction(...args, {from, value, gas})
 
-        var responseJson = {
-            valueSent: srcBalanceBefore - srcBalanceAfter,
-            valueReceived: dstBalanceAfter - dstBalanceBefore,
-            gasPrice: +t.gasPrice,
-            nonce: +t.nonce,
-        }
+            // according to https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-methods sendTransaction should be sync,
+            //   and only return after transaction is complete and tr is non-null.
+            // This turned out not to be the case with testnet geth, hence: only resolve promise after we definitely have the tr
+            var tr = web3.eth.getTransactionReceipt(tx)
+            if (tr) {
+                done({srcBalanceBefore, dstBalanceBefore, tx, tr})
+            } else {
+                // if for some reason tr won't come out AS IT SHOULD, fall back to checking every time a new block comes out
+                var filter = web3.eth.filter("latest").watch((e, block) => {
+                    var tr = web3.eth.getTransactionReceipt(tx)
+                    if (tr) {
+                        filter.stopWatching()
+                        done({srcBalanceBefore, dstBalanceBefore, tx, tr})
+                    }
+                })
+            }
+        }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr}) => {
+            var srcBalanceAfter = web3.eth.getBalance(from)
+            var dstBalanceAfter = web3.eth.getBalance(to)
+            var t = web3.eth.getTransaction(tx)
 
-        // not sure when tr can be null; usually it means func has been called async and it's not mined yet
-        //   could also be call that causes contract to selfdestruct
-        if (tr) {
             // cryptographic (sha3) signature used to recognize event in transaction receipt -> event
             eventsBySignature = _(abi)
                 .filter(m => m.type === "event")
@@ -60,14 +68,16 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
                 return [event.name, SolidityCoder.decodeParams(types, rawArgs)]
             }).fromPairs().value()
 
-            _.assign(responseJson, {
+            return {
+                valueSent: srcBalanceBefore - srcBalanceAfter,
+                valueReceived: dstBalanceAfter - dstBalanceBefore,
+                gasPrice: +t.gasPrice,
+                nonce: +t.nonce,
                 gasUsed: +tr.cumulativeGasUsed,
                 blockNumber: +tr.blockNumber,
                 events
-            })
-        }
-
-        return responseJson
+            }
+        })
     }
 }
 

@@ -26,17 +26,18 @@ var router = express.Router()
 logger(app)
 
 
+
+
 router.post("/call", function (req, res, next) {
-  var result = { error: "Unknown error" }
-  try {
-    var req_body = req.body
-    result = ethCall(req_body.source, req_body.target,
-        req_body.abi, req_body.function, req_body.arguments,
-        req_body.value)
-  } catch (e) {
-    result = {error: e.toString()}
-  }
-  res.send(result)
+  var req_body = req.body
+  return ethCall(
+      req_body.source, req_body.target,
+      req_body.abi, req_body.function, req_body.arguments, req_body.value
+  ).then(result => {
+    res.send(result)
+  }).catch(e => {
+    res.send({error: e.toString()})
+  })
 })
 
 router.post("/compile", function (req, res, next) {
@@ -51,7 +52,9 @@ router.post("/compile", function (req, res, next) {
 
 router.post("/deploy", function (req, res, next) {
   var req_body = req.body
-  return deployContracts(req_body.code, req_body.args, req_body.value, req_body.from).then(result => {
+  return deployContracts(
+      req_body.code, req_body.args, req_body.value, req_body.from
+  ).then(result => {
     res.send(result)
   }).catch(e => {
     res.send({error: e.toString()})
