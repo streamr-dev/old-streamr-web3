@@ -26,10 +26,10 @@ var router = express.Router()
 logger(app)
 
 
-router.post("/call", bodyParser.text(), function (req, res, next) {
+router.post("/call", function (req, res, next) {
   var result = { error: "Unknown error" }
   try {
-    var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
+    var req_body = req.body
     result = ethCall(req_body.source, req_body.target,
         req_body.abi, req_body.function, req_body.arguments,
         req_body.value)
@@ -39,18 +39,18 @@ router.post("/call", bodyParser.text(), function (req, res, next) {
   res.send(result)
 })
 
-router.post("/compile", bodyParser.text(), function (req, res, next) {
+router.post("/compile", function (req, res, next) {
   var result = { error: "Unknown error" }
   try {
-    result = getAbi(req.body)
+    result = getAbi(req.body.code)
   } catch (e) {
     result = {error: e.toString()}
   }
   res.send(result)
 })
 
-router.post("/deploy", bodyParser.text(), function (req, res, next) {
-  var req_body = JSON.parse(req.body)     // bodyParser.json() failed to parse for some reason
+router.post("/deploy", function (req, res, next) {
+  var req_body = req.body
   return deployContracts(req_body.code, req_body.args, req_body.value, req_body.from).then(result => {
     res.send(result)
   }).catch(e => {
