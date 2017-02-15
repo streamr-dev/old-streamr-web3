@@ -29,7 +29,7 @@ function deployContracts(code, constructorParams, value, from) {
     _(contracts).each(c => {
         // see https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethcontract
         var Contract = web3.eth.contract(c.abi)
-        var gas = web3.eth.estimateGas({data: c.bytecode}) * 2
+        var gas = web3.eth.estimateGas({data: c.bytecode.startsWith("0x") ? c.bytecode : "0x" + c.bytecode}) * 2
         var data = c.bytecode
         // TODO: check and typecast constructorParams (e.g. BigIntegers)
         var p = new Promise((done, fail) => {
