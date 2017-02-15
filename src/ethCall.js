@@ -35,30 +35,39 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
         var t = web3.eth.getTransaction(tx)
         var tr = web3.eth.getTransactionReceipt(tx)
 
-        // cryptographic (sha3) signature used to recognize event in transaction receipt -> event
-        eventsBySignature = _(abi)
-            .filter(m => m.type === "event")
-            .map(m => [new SolidityEvent(null, m, null).signature(), m])
-            .fromPairs()
-
-        events = {}
-        _(tr.logs).each(log => {
-            var sig = log.topics[0].replace("0x", "")
-            var event = eventsBySignature.get(sig)
-            var types = event.inputs.map(i => i.type);
-            var rawArgs = log.data.replace("0x", "");
-            events[event.name] = SolidityCoder.decodeParams(types, rawArgs);
-        })
-
-        return {
+        var responseJson = {
             valueSent: srcBalanceBefore - srcBalanceAfter,
             valueReceived: dstBalanceAfter - dstBalanceBefore,
-            gasUsed: +tr.cumulativeGasUsed,
             gasPrice: +t.gasPrice,
-            blockNumber: +tr.blockNumber,
             nonce: +t.nonce,
-            events
         }
+
+        // not sure when tr can be null; usually it means func has been called async and it's not mined yet
+        //   could also be call that causes contract to selfdestruct
+        if (tr) {
+            // cryptographic (sha3) signature used to recognize event in transaction receipt -> event
+            eventsBySignature = _(abi)
+                .filter(m => m.type === "event")
+                .map(m => [new SolidityEvent(null, m, null).signature(), m])
+                .fromPairs()
+
+            // events that were fired during transaction execution
+            events = _(tr.logs).map(log => {
+                var sig = log.topics[0].replace("0x", "")
+                var event = eventsBySignature.get(sig)
+                var types = event.inputs.map(i => i.type)
+                var rawArgs = log.data.replace("0x", "")
+                return [event.name, SolidityCoder.decodeParams(types, rawArgs)]
+            }).fromPairs().value()
+
+            _.assign(responseJson, {
+                gasUsed: +tr.cumulativeGasUsed,
+                blockNumber: +tr.blockNumber,
+                events
+            })
+        }
+
+        return responseJson
     }
 }
 
