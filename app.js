@@ -10,6 +10,10 @@ var {getAbi, deployContracts} = require("./src/compileContracts")
 
 var app = express();
 
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -22,18 +26,6 @@ var router = express.Router()
 
 
 
-
-
-/** Status page */
-router.get("/", function (req, res, next) {
-  res.render("index", {web3})
-});
-
-router.post("/profile", function (req, res, next) {
-  res.send({
-    address: web3.eth.coinbase
-  })
-})
 
 router.post("/call", bodyParser.text(), function (req, res, next) {
   var result = { error: "Unknown error" }
@@ -67,6 +59,23 @@ router.post("/deploy", bodyParser.text(), function (req, res, next) {
   })
 })
 
+
+
+
+var Web3 = require("web3")
+var web3 = new Web3()
+web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
+
+/** Status page */
+router.get("/", function (req, res, next) {
+  res.render("index", {web3})
+});
+
+router.get("/profile", function (req, res, next) {
+  res.send({
+    address: web3.eth.coinbase
+  })
+})
 
 
 
