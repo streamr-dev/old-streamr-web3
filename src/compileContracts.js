@@ -31,14 +31,15 @@ function deployContracts(code, constructorParams, value, from) {
         var Contract = web3.eth.contract(c.abi)
         var data = c.bytecode.startsWith("0x") ? c.bytecode : "0x" + c.bytecode
         var gas = web3.eth.estimateGas({data}) * 2
-        // TODO: check and typecast constructorParams (e.g. BigIntegers)
+        // TODO: check and typecast constructorParams (ESPECIALLY addresses, but also e.g. BigIntegers)
         var p = new Promise((done, fail) => {
             var instance = Contract.new(...constructorParams, {from, value, data, gas})
-            web3.eth.filter("latest").watch((e, block) => {
+            var filter = web3.eth.filter("latest").watch((e, block) => {
                 // Contract.new will assign the address directly in the instance when it gets it
                 //   there is a bit of a race condition here though: internally Contract.new also watches "latest", so
                 //   we of course hope it gets its turn first... which it should, since it registered first
                 if (instance.address) {
+                    filter.stopWatching()
                     c.address = instance.address
                     done(c)
                 }
