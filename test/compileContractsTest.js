@@ -82,4 +82,19 @@ describe("deployContracts", function () {
             assert(contracts[0].address)
         })
     })
+
+    it("should error without code", function () {
+        return deployContracts().then(resp => {
+            throw "should not succeed!"
+        }).catch(e => {
+            assert.equal(e, "Code to deploy not provided!")
+        })
+    })
+
+    it("should return compile errors with erroneous code", function () {
+        return deployContracts("bogus").then(resp => {
+            assert(resp.contracts.length == 0)
+            assert(resp.errors.length > 0)
+        })
+    })
 })

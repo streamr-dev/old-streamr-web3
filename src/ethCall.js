@@ -8,9 +8,9 @@ web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
 
 function ethCall(from, to, abi, functionName, args, value, gas) {
     if (typeof from != "string") { from = web3.eth.coinbase }
-    if (typeof to != "string") { throw "Missing target address!" }
-    if (!abi) { throw "Missing contract interface (abi)!" }
-    if (!functionName) { throw "Missing function name!" }
+    if (typeof to != "string") { return Promise.reject("Missing target address!") }
+    if (!abi) { return Promise.reject("Missing contract interface (abi)!") }
+    if (!functionName) { return Promise.reject("Missing function name!") }
     if (!args) { args = [] }
     if (!value) { value = 0 }
     if (!gas) { gas = 2000000 }
@@ -18,14 +18,14 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
 
     var contract = web3.eth.contract(abi).at(to)
     var func = contract[functionName]
-    if (!func) { throw functionName + " not found in contract!" }
+    if (!func) { return Promise.reject(functionName + " not found in contract!") }
 
     var interface = _(abi).find(m => m.type === "function" && m.name === functionName)
-    if (!interface) { throw functionName + " not found in ABI!" }
+    if (!interface) { return Promise.reject(functionName + " not found in ABI!") }
     if (interface.constant) {
         var res = func(...args)
         if (!_(res).isArray()) { res = [res]; }
-        return {results: res}
+        return Promise.resolve({results: res})
     } else {
         return new Promise((done, fail) => {
             var srcBalanceBefore = web3.eth.getBalance(from)

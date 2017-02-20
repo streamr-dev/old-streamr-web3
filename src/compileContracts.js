@@ -1,5 +1,5 @@
 var _ = require("lodash")
-var Promise = require("bluebird")
+//var Promise = require("bluebird")
 var solc = require("solc")
 
 var Web3 = require("web3")
@@ -19,7 +19,7 @@ function getAbi(code) {
 }
 
 function deployContracts(code, constructorParams, value, from) {
-    if (!code) { throw "Code to deploy not provided!" }
+    if (!code) { return Promise.reject("Code to deploy not provided!") }
     if (!constructorParams) { constructorParams = [] }
     if (!value) { value = 0 }
     if (!from) { from = web3.eth.coinbase }

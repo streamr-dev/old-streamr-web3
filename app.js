@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var ethCall = require("./src/ethCall")
 var {getAbi, deployContracts} = require("./src/compileContracts")
+var getContractAt = require("./src/getContractAt")
 
 var app = express();
 
@@ -27,17 +28,27 @@ logger(app)
 
 
 
-
-router.post("/call", function (req, res, next) {
-  var req_body = req.body
-  return ethCall(
-      req_body.source, req_body.target,
-      req_body.abi, req_body.function, req_body.arguments, req_body.value
-  ).then(result => {
+function responsePromise(p) {
+  return p.then(result => {
     res.send(result)
   }).catch(e => {
     res.send({error: e.toString()})
   })
+}
+
+router.post("/call", function (req, res, next) {
+  return responsePromise(ethCall(
+      req.body.source, req.body.target,
+      req.body.abi, req.body.function, req.body.arguments, req.body.value
+  ))
+})
+
+router.post("/deploy", function (req, res, next) {
+  return responsePromise(deployContracts(req.body.code, req.body.args, req.body.value, req.body.from))
+})
+
+router.get("/contract", function (req, res, next) {
+  return responsePromise(getContractAt(req.params.at))
 })
 
 router.post("/compile", function (req, res, next) {
@@ -48,17 +59,6 @@ router.post("/compile", function (req, res, next) {
     result = {error: e.toString()}
   }
   res.send(result)
-})
-
-router.post("/deploy", function (req, res, next) {
-  var req_body = req.body
-  return deployContracts(
-      req_body.code, req_body.args, req_body.value, req_body.from
-  ).then(result => {
-    res.send(result)
-  }).catch(e => {
-    res.send({error: e.toString()})
-  })
 })
 
 
