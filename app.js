@@ -28,7 +28,7 @@ logger(app)
 
 
 
-function responsePromise(p) {
+function responsePromise(res, p) {
   return p.then(result => {
     res.send(result)
   }).catch(e => {
@@ -37,18 +37,18 @@ function responsePromise(p) {
 }
 
 router.post("/call", function (req, res, next) {
-  return responsePromise(ethCall(
+  return responsePromise(res, ethCall(
       req.body.source, req.body.target,
       req.body.abi, req.body.function, req.body.arguments, req.body.value
   ))
 })
 
 router.post("/deploy", function (req, res, next) {
-  return responsePromise(deployContracts(req.body.code, req.body.args, req.body.value, req.body.from))
+  return responsePromise(res, deployContracts(req.body.code, req.body.args, req.body.value, req.body.from))
 })
 
 router.get("/contract", function (req, res, next) {
-  return responsePromise(getContractAt(req.params.at))
+  return responsePromise(res, getContractAt(req.params.at))
 })
 
 router.post("/compile", function (req, res, next) {
