@@ -18,7 +18,7 @@ app.set('view engine', 'jade');
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -27,41 +27,38 @@ var router = express.Router()
 logger(app)
 
 
-
 function responsePromise(res, p) {
-  return p.then(result => {
-    res.send(result)
-  }).catch(e => {
-    res.send({error: e.toString()})
-  })
+    return p.then(result => {
+        res.send(result)
+    }).catch(e => {
+        res.send({error: e.toString()})
+    })
 }
 
 router.post("/call", function (req, res, next) {
-  return responsePromise(res, ethCall(
-      req.body.source, req.body.target,
-      req.body.abi, req.body.function, req.body.arguments, req.body.value
-  ))
+    return responsePromise(res, ethCall(
+        req.body.source, req.body.target,
+        req.body.abi, req.body.function, req.body.arguments, req.body.value
+    ))
 })
 
 router.post("/deploy", function (req, res, next) {
-  return responsePromise(res, deployContracts(req.body.code, req.body.args, req.body.value, req.body.from))
+    return responsePromise(res, deployContracts(req.body.code, req.body.args, req.body.value, req.body.from))
 })
 
 router.get("/contract", function (req, res, next) {
-  return responsePromise(res, getContractAt(req.params.at))
+    return responsePromise(res, getContractAt(req.params.at))
 })
 
 router.post("/compile", function (req, res, next) {
-  var result = { error: "Unknown error" }
-  try {
-    result = getAbi(req.body.code)
-  } catch (e) {
-    result = {error: e.toString()}
-  }
-  res.send(result)
+    var result = {error: "Unknown error"}
+    try {
+        result = getAbi(req.body.code)
+    } catch (e) {
+        result = {error: e.toString()}
+    }
+    res.send(result)
 })
-
-
 
 
 var Web3 = require("web3")
@@ -70,36 +67,33 @@ web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
 
 /** Status page */
 router.get("/", function (req, res, next) {
-  res.render("index", {web3})
+    res.render("index", {web3})
 });
 
 router.get("/profile", function (req, res, next) {
-  res.send({
-    address: web3.eth.coinbase
-  })
+    res.send({
+        address: web3.eth.coinbase
+    })
 })
-
-
-
 
 
 app.use('/', router);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+app.use(function (req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  console.log(err)
-  res.status(err.status || 500).send({errors: [err]})
+    console.log(err)
+    res.status(err.status || 500).send({errors: [err]})
 });
 
 module.exports = app;

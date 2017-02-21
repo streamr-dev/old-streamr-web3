@@ -23,7 +23,7 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
     var interface = _(abi).find(m => m.type === "function" && m.name === functionName)
     if (!interface) { return Promise.reject(functionName + " not found in ABI!") }
     if (interface.constant) {
-        var res = func(...args)
+        var res = func.call(...args)
         if (!_(res).isArray()) { res = [res]; }
         return Promise.resolve({results: res})
     } else {
