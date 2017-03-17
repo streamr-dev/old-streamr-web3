@@ -1,6 +1,9 @@
 var assert = require("assert")
 var {getAbi, deployContracts} = require("../src/compileContracts")
 
+const web3 = require("../src/signed-web3")
+require("./setupTestKeys")
+
 var TEST_CODE = `
 pragma solidity ^0.4.0;
 contract Test {
@@ -75,7 +78,7 @@ contract PayByUse {
 describe("deployContracts", function () {
     it("should get an address", function () {
         this.timeout(0)     // disable timeout
-        return deployContracts(TEST_CODE).then(res => {
+        return deployContracts(TEST_CODE, [], web3.eth.coinbase).then(res => {
             var {contracts, errors} = res
             assert.equal(contracts.length, 1)
             assert.equal(errors.length, 0)
@@ -89,12 +92,12 @@ describe("deployContracts", function () {
         }).then(resp => {
             throw new Error("should not succeed!")
         }).catch(e => {
-            assert.equal(e, "Must provide code to deploy (code:string)")
+            assert.equal(e.message, "Must provide code to deploy (code:string)")
         })
     })
 
     it("should return compile errors with erroneous code", function () {
-        return deployContracts("bogus").then(resp => {
+        return deployContracts("bogus", [], web3.eth.coinbase).then(resp => {
             assert(resp.contracts.length == 0)
             assert(resp.errors.length > 0)
         })

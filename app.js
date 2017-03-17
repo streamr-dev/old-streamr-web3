@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var {ethCall, ethSend} = require("./src/ethCall")
 var {getAbi, deployContracts} = require("./src/compileContracts")
 var getContractAt = require("./src/getContractAt")
+var web3 = require("./src/signed-web3")
 
 var app = express();
 
@@ -22,10 +23,21 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var router = express.Router()
-
 logger(app)
 
+var router = express.Router()
+//router.use(interceptKey)
+
+function interceptKey(req, res, next) {
+    if (!req.body.source) {
+        res.send({error: "Must specify transaction source address (source:string)"})
+    } else if (!req.body.key) {
+        res.send({error: "Must specify private key to sign transactions with (key:string)"})
+    } else {
+        web3.streamr.setKeyForAddress(req.body.source, req.body.key)
+        next()
+    }
+}
 
 // wrap request handlers for uniform express-related error/response handling
 function responsePromise(res, handler, args) {
@@ -37,7 +49,7 @@ function responsePromise(res, handler, args) {
         res.send({errors: [e.toString()]})
     })
 }
-
+        
 router.post("/call", function (req, res, next) {
     return responsePromise(res, ethCall, [
         req.body.source, req.body.target,
@@ -45,37 +57,27 @@ router.post("/call", function (req, res, next) {
     ])
 })
 
-router.post("/send", function (req, res, next) {
+router.post("/send", interceptKey, function (req, res, next) {
     return responsePromise(res, ethSend, [req.body.source, req.body.target, req.body.value])
 })
 
-router.post("/deploy", function (req, res, next) {
-    return responsePromise(res, deployContracts, [req.body.code, req.body.args, req.body.value, req.body.from])
+router.post("/deploy", interceptKey, function (req, res, next) {
+    return responsePromise(res, deployContracts, [req.body.code, req.body.args, req.body.source, req.body.value])
 })
 
-router.get("/contract", function (req, res, next) {
+router.get("/contract", interceptKey, function (req, res, next) {
     return responsePromise(res, getContractAt, [req.params.at])
 })
 
-router.post("/compile", function (req, res, next) {
+router.post("/compile", interceptKey, function (req, res, next) {
     return responsePromise(res, getAbi, [req.body.code])
 })
 
-
-var Web3 = require("web3")
-var web3 = new Web3()
-web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
 
 /** Status page */
 router.get("/", function (req, res, next) {
     res.render("index", {web3})
 });
-
-router.get("/profile", function (req, res, next) {
-    res.send({
-        address: web3.eth.coinbase
-    })
-})
 
 
 app.use('/', router);

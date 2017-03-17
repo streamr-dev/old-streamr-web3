@@ -1,17 +1,19 @@
 var assert = require("assert")
 var {ethCall, ethSend} = require("../src/ethCall")
 
-var Web3 = require("web3")
-var web3 = new Web3()
-web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
+require("./setupTestKeys")
+
+const web3 = require("../src/signed-web3")
 
 describe("ethCall", () => {
     it("should return error if no function name given", function () {
         this.timeout(0)     // disable timeout
-        return ethCall("src", "target", "abi", null).then(() => {
+        Promise.resolve().then(() => {
+            return ethCall("src", "target", "abi", null)
+        }).then(() => {
             throw "shouldn't succeed"
         }).catch(e => {
-            assert.equal(e, "Missing function name!")
+            assert.equal(e.message, "Missing function name (function:string)")
         })
     })
 

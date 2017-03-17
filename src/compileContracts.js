@@ -1,10 +1,9 @@
-var _ = require("lodash")
-//var Promise = require("bluebird")
-var solc = require("solc")
+const _ = require("lodash")
+//const Promise = require("bluebird")
 
-var Web3 = require("web3")
-var web3 = new Web3()
-web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
+const web3 = require("./signed-web3")
+const solc = require("solc")
+const ContractFactory = require("web3/lib/web3/contract")
 
 function getAbi(code) {
     var compiled = solc.compile(code)
@@ -18,17 +17,18 @@ function getAbi(code) {
     return {contracts, errors}
 }
 
-function deployContracts(code, constructorParams, value, from) {
-    if (!code) { throw "Must provide code to deploy (code:string)" }
+function deployContracts(code, constructorParams, from, value) {
+    if (!code) { throw new Error("Must provide code to deploy (code:string)") }
     if (!constructorParams) { constructorParams = [] }
+    if (!from) { throw new Error("Must provide sender account (from:address)") }
     if (!value) { value = 0 }
-    if (!from) { from = web3.eth.coinbase }
 
     var {contracts, errors} = getAbi(code)
     var deploymentsDone = []
     _(contracts).each(c => {
         // see https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethcontract
-        var Contract = web3.eth.contract(c.abi)
+        //var Contract = web3.eth.contract(c.abi)
+        var Contract = new ContractFactory(web3.eth, c.abi)
         var data = c.bytecode.startsWith("0x") ? c.bytecode : "0x" + c.bytecode
         var gas = web3.eth.estimateGas({data}) * 2
         // TODO: check and typecast constructorParams (ESPECIALLY addresses, but also e.g. BigIntegers)
