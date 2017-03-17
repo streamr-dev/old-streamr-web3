@@ -28,6 +28,7 @@ logger(app)
 var router = express.Router()
 //router.use(interceptKey)
 
+// any api handler that uses (signed) sendTransaction needs to hand over the private key first
 function interceptKey(req, res, next) {
     if (!req.body.source) {
         res.send({error: "Must specify transaction source address (source:string)"})
@@ -50,7 +51,7 @@ function responsePromise(res, handler, args) {
     })
 }
         
-router.post("/call", function (req, res, next) {
+router.post("/call", interceptKey, function (req, res, next) {
     return responsePromise(res, ethCall, [
         req.body.source, req.body.target,
         req.body.abi, req.body.function, req.body.arguments, req.body.value
@@ -65,11 +66,11 @@ router.post("/deploy", interceptKey, function (req, res, next) {
     return responsePromise(res, deployContracts, [req.body.code, req.body.args, req.body.source, req.body.value])
 })
 
-router.get("/contract", interceptKey, function (req, res, next) {
+router.get("/contract", function (req, res, next) {
     return responsePromise(res, getContractAt, [req.params.at])
 })
 
-router.post("/compile", interceptKey, function (req, res, next) {
+router.post("/compile", function (req, res, next) {
     return responsePromise(res, getAbi, [req.body.code])
 })
 
