@@ -83,11 +83,13 @@ describe("deployContracts", function () {
         })
     })
 
-    it("should error without code", function () {
-        return deployContracts().then(resp => {
-            throw "should not succeed!"
+    it("should error if code is missing", function () {
+        return Promise.resolve().then(() => {
+            return deployContracts()
+        }).then(resp => {
+            throw new Error("should not succeed!")
         }).catch(e => {
-            assert.equal(e, "Code to deploy not provided!")
+            assert.equal(e, "Must provide code to deploy (code:string)")
         })
     })
 

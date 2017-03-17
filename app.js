@@ -27,41 +27,38 @@ var router = express.Router()
 logger(app)
 
 
-function responsePromise(res, p) {
-    return p.then(result => {
+// wrap request handlers for uniform express-related error/response handling
+function responsePromise(res, handler, args) {
+    return Promise.resolve().then(() => {
+        return handler.apply(null, args)
+    }).then(result => {
         res.send(result)
     }).catch(e => {
-        res.send({error: e.toString()})
+        res.send({errors: [e.toString()]})
     })
 }
 
 router.post("/call", function (req, res, next) {
-    return responsePromise(res, ethCall(
+    return responsePromise(res, ethCall, [
         req.body.source, req.body.target,
         req.body.abi, req.body.function, req.body.arguments, req.body.value
-    ))
+    ])
 })
 
 router.post("/send", function (req, res, next) {
-    return responsePromise(res, ethSend(req.body.source, req.body.target, req.body.value))
+    return responsePromise(res, ethSend, [req.body.source, req.body.target, req.body.value])
 })
 
 router.post("/deploy", function (req, res, next) {
-    return responsePromise(res, deployContracts(req.body.code, req.body.args, req.body.value, req.body.from))
+    return responsePromise(res, deployContracts, [req.body.code, req.body.args, req.body.value, req.body.from])
 })
 
 router.get("/contract", function (req, res, next) {
-    return responsePromise(res, getContractAt(req.params.at))
+    return responsePromise(res, getContractAt, [req.params.at])
 })
 
 router.post("/compile", function (req, res, next) {
-    var result = {error: "Unknown error"}
-    try {
-        result = getAbi(req.body.code)
-    } catch (e) {
-        result = {error: e.toString()}
-    }
-    res.send(result)
+    return responsePromise(res, getAbi, [req.body.code])
 })
 
 

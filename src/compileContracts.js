@@ -19,7 +19,7 @@ function getAbi(code) {
 }
 
 function deployContracts(code, constructorParams, value, from) {
-    if (!code) { return Promise.reject("Code to deploy not provided!") }
+    if (!code) { throw "Must provide code to deploy (code:string)" }
     if (!constructorParams) { constructorParams = [] }
     if (!value) { value = 0 }
     if (!from) { from = web3.eth.coinbase }
