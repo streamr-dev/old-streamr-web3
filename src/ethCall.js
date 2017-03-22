@@ -4,6 +4,8 @@ const web3 = require("./signed-web3")
 const SolidityEvent = require("web3/lib/web3/event.js")
 const SolidityCoder = require("web3/lib/solidity/coder.js")
 
+const THROW_ERROR_MESSAGE = "transaction rolled back after 'throw'"
+
 function ethCall(from, to, abi, functionName, args, value, gas) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
@@ -95,7 +97,10 @@ function transactionPromise(from, to, abi, getTransaction) {
         }
 
         return ret
-    })    
+    }).catch(e => {
+        // replace the cryptic error message when solidity code throws
+        throw e.message.includes("invalid JUMP") ? new Error(THROW_ERROR_MESSAGE) : e
+    })
 }
 
 function wrapArray(maybeArray) {

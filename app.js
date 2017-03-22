@@ -47,7 +47,7 @@ function responsePromise(res, handler, args) {
     }).then(result => {
         res.send(result)
     }).catch(e => {
-        res.send({errors: [e.toString()]})
+        res.send({error: e.toString()})
     })
 }
         
