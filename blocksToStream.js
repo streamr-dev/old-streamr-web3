@@ -4,7 +4,7 @@ var restler = require("restler");
 var ETHEREUM_CLIENT_URL = "http://localhost:8545"
 //var STREAMR_HTTP_API_URL = "http://dev-data.streamr/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data?auth=gZHlcFf-R3mqTzOgN16SXA"
 //var STREAMR_HTTP_API_URL = "http://localhost:8080/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data?auth=gZHlcFf-R3mqTzOgN16SXA"
-var STREAMR_HTTP_API_URL = "https://eth.streamr.com/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data?auth=gZHlcFf-R3mqTzOgN16SXA"
+var STREAMR_HTTP_API_URL = "https://eth.streamr.com/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data"
 
 var Web3 = require("web3")
 var web3 = new Web3()
@@ -45,7 +45,8 @@ filter.watch(function (error, blockHash) {
             console.log(`Bad recipient ${tx.to}: ${e.toString()}`)
         }
         var data = JSON.stringify(msg)
-        restler.post(STREAMR_HTTP_API_URL, {data}).on("complete", (result, response) => {
+        var headers = { Authorization: 'token gZHlcFf-R3mqTzOgN16SXA' }
+        restler.post(STREAMR_HTTP_API_URL, { data, headers }).on("complete", (result, response) => {
             if (!response || response.statusCode != 204 && response.statusCode != 200) {
                 console.log(result)     // error probably
             } else {
