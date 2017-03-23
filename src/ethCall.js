@@ -45,28 +45,33 @@ function ethSend(from, to, value) {
 }
 
 function transactionPromise(from, to, abi, getTransaction) {
-    return new Promise((done, fail) => {
-        const srcBalanceBefore = web3.eth.getBalance(from)
-        const dstBalanceBefore = web3.eth.getBalance(to)
-        return getTransaction()
-    }).then(tx => {
+    const srcBalanceBefore = web3.eth.getBalance(from)
+    const dstBalanceBefore = web3.eth.getBalance(to)
+    return getTransaction().then(tx => {
+        const t = web3.eth.getTransaction(tx)
+        if (!t) { throw new Error("Faulty transaction: " + tx) }
         const tr = web3.eth.getTransactionReceipt(tx)
         if (tr) {
-            done({srcBalanceBefore, dstBalanceBefore, tx, tr})
+            console.log("Got receipt: " + JSON.stringify(tr))
+            return {srcBalanceBefore, dstBalanceBefore, tx, tr, t}
         } else {
             // if for some reason tr won't come out AS IT SHOULD, fall back to checking every time a new block comes out
-            const filter = web3.eth.filter("latest").watch((e, block) => {
-                const tr = web3.eth.getTransactionReceipt(tx)
-                if (tr) {
-                    filter.stopWatching()
-                    done({srcBalanceBefore, dstBalanceBefore, tx, tr})
-                }
+            console.log("Waiting for receipt...")
+            return new Promise((done, fail) => {
+                const filter = web3.eth.filter("latest").watch((e, block) => {
+                    console.log("Still waiting for receipt...")
+                    const tr = web3.eth.getTransactionReceipt(tx)
+                    if (tr) {
+                        console.log("Got receipt: " + JSON.stringify(tr))
+                        filter.stopWatching()
+                        done({srcBalanceBefore, dstBalanceBefore, tx, tr, t})
+                    }
+                })
             })
         }
-    }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr}) => {
+    }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr, t}) => {
         const srcBalanceAfter = web3.eth.getBalance(from)
         const dstBalanceAfter = web3.eth.getBalance(to)
-        const t = web3.eth.getTransaction(tx)
 
         const ret = {
             valueSent: srcBalanceBefore.minus(srcBalanceAfter).toNumber(),

@@ -18,6 +18,7 @@ module.exports = signed_web3
 function signTransaction(rawTx) {
     const key = keys[rawTx.from]
     if (!key) { throw new Error("Missing key for " + rawTx.from) }
+    console.log(`signing ${JSON.stringify(rawTx)} with ${key}`)
     return sign(rawTx, key)
 }
 
@@ -52,6 +53,8 @@ function send(payload) {
     })
 }
 
+currentId = 1234
+
 /**
  * Send async override
  * Adapted from https://github.com/ethjs/ethjs-provider-signer
@@ -72,7 +75,7 @@ function sendAsync(payload, callback) {
     // get the nonce, if any
     raw_httpProvider.sendAsync({
         jsonrpc: "2.0",
-        id: "1",
+        id: currentId++,
         method: 'eth_getTransactionCount',
         params: [payload.params[0].from, 'latest']
     }, function (nonceError, nonceResponse) {
@@ -84,7 +87,7 @@ function sendAsync(payload, callback) {
         // get the gas price, if any
         raw_httpProvider.sendAsync({
             jsonrpc: "2.0",
-            id: "1",
+            id: currentId++,
             method: 'eth_gasPrice'
         }, function (gasPriceError, gasPriceResponse) {
             // eslint-disable-line
@@ -94,7 +97,7 @@ function sendAsync(payload, callback) {
 
             // build raw tx payload with nonce and gasprice as defaults to be overriden
             var rawTxPayload = Object.assign({
-                nonce: nonceResponse.result,
+                nonce: nonceResponse.result + (+new Date()),
                 gasPrice: gasPriceResponse.result,
                 gas: "0x200000"
             }, payload.params[0]);
