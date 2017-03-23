@@ -1,7 +1,7 @@
 const sign = require("ethjs-signer").sign
 
 const Web3 = require("web3")
-const HttpProvider = require("web3/lib/web3/HttpProvider")
+const HttpProvider = require("web3/lib/web3/httpprovider")
 
 // "raw" one will be used to talk to RPC server, only send/sendAsync overridden
 const raw_httpProvider = new HttpProvider("http://localhost:8545")
