@@ -71,6 +71,8 @@ function sendAsync(payload, callback) {
     
     // get the nonce, if any
     raw_httpProvider.sendAsync({
+        jsonrpc: "2.0",
+        id: "1",
         method: 'eth_getTransactionCount',
         params: [payload.params[0].from, 'latest']
     }, function (nonceError, nonceResponse) {
@@ -80,7 +82,11 @@ function sendAsync(payload, callback) {
         }
 
         // get the gas price, if any
-        raw_httpProvider.sendAsync({ method: 'eth_gasPrice' }, function (gasPriceError, gasPriceResponse) {
+        raw_httpProvider.sendAsync({
+            jsonrpc: "2.0",
+            id: "1",
+            method: 'eth_gasPrice'
+        }, function (gasPriceError, gasPriceResponse) {
             // eslint-disable-line
             if (gasPriceError) {
                 return callback(new Error('[ethjs-provider-signer] while getting gasPrice: ' + gasPriceError), null);
@@ -89,7 +95,8 @@ function sendAsync(payload, callback) {
             // build raw tx payload with nonce and gasprice as defaults to be overriden
             var rawTxPayload = Object.assign({
                 nonce: nonceResponse.result,
-                gasPrice: gasPriceResponse.result
+                gasPrice: gasPriceResponse.result,
+                gas: 2000000
             }, payload.params[0]);
 
             // sign transaction with raw tx payload
