@@ -96,7 +96,7 @@ function sendAsync(payload, callback) {
             var rawTxPayload = Object.assign({
                 nonce: nonceResponse.result,
                 gasPrice: gasPriceResponse.result,
-                gas: 2000000
+                gas: "0x200000"
             }, payload.params[0]);
 
             // sign transaction with raw tx payload
