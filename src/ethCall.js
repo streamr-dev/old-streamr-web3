@@ -1,5 +1,6 @@
 const _ = require("lodash")
 const web3 = require("./signed-web3")
+const Promise = require("bluebird")
 
 const SolidityEvent = require("web3/lib/web3/event.js")
 const SolidityCoder = require("web3/lib/solidity/coder.js")
@@ -27,7 +28,7 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
         return Promise.resolve({results: wrapArray(res)})
     } else {
         return transactionPromise(from, to, abi, () => {
-            return func.sendTransaction(...args, {from, value, gas})
+            return Promise.promisify(func.sendTransaction)(...args, {from, value, gas})
         })
     }
 }
@@ -39,7 +40,7 @@ function ethSend(from, to, value) {
     if (!value) { value = 0 }
 
     return transactionPromise(from, to, null, () => {
-        return web3.eth.sendTransaction({from, to, value})
+        return Promise.promisify(web3.eth.sendTransaction)({from, to, value})
     })
 }
 
@@ -47,12 +48,8 @@ function transactionPromise(from, to, abi, getTransaction) {
     return new Promise((done, fail) => {
         const srcBalanceBefore = web3.eth.getBalance(from)
         const dstBalanceBefore = web3.eth.getBalance(to)
-        const tx = getTransaction()
-
-        // according to https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-methods sendTransaction should be sync,
-        //   and only return after transaction is complete and tr is non-null.
-        // This turned out not to be the case with testnet geth, hence: only resolve promise after we definitely have the tr
-        //   TODO: use async (promisified) sendTransaction, surely the way it now works is better
+        return getTransaction()
+    }).then(tx => {
         const tr = web3.eth.getTransactionReceipt(tx)
         if (tr) {
             done({srcBalanceBefore, dstBalanceBefore, tx, tr})
