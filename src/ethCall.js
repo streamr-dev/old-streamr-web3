@@ -52,6 +52,7 @@ function transactionPromise(from, to, abi, getTransaction) {
         // according to https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-methods sendTransaction should be sync,
         //   and only return after transaction is complete and tr is non-null.
         // This turned out not to be the case with testnet geth, hence: only resolve promise after we definitely have the tr
+        //   TODO: use async (promisified) sendTransaction, surely the way it now works is better
         const tr = web3.eth.getTransactionReceipt(tx)
         if (tr) {
             done({srcBalanceBefore, dstBalanceBefore, tx, tr})

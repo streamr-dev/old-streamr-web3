@@ -27,7 +27,8 @@ filter.watch(function (error, blockHash) {
             txHash: txHash,
             etherSent: +web3.fromWei(tx.value, "ether"),
             gasUsed: tr.cumulativeGasUsed,
-            eventCount: tr.logs.length
+            eventCount: tr.logs.length,
+            internal: false
         }
         if (tr.contractAddress) {
             msg.contractCreated = tr.contractAddress
@@ -44,16 +45,48 @@ filter.watch(function (error, blockHash) {
         } catch (e) {
             console.log(`Bad recipient ${tx.to}: ${e.toString()}`)
         }
-        var data = JSON.stringify(msg)
-        var headers = { Authorization: 'token gZHlcFf-R3mqTzOgN16SXA' }
-        restler.post(STREAMR_HTTP_API_URL, { data, headers }).on("complete", (result, response) => {
-            if (!response || response.statusCode != 204 && response.statusCode != 200) {
-                console.log(result)     // error probably
-            } else {
-                process.stdout.write("<")
+        
+        send(msg)
+
+        const transfers = trace.getInternalTransfers(web3.currentProvider, txHash, tx.to)
+        _(transfers).each(tf => {
+            const internalMsg = {
+                blockNumber: msg.number,
+                txHash: msg.txHash,
+                etherSent: tf.etherSent,
+                gasUsed: tf.gasUsed,
+                internal: true
+                // TODO: count events?
             }
+            // TODO: report created contracts?
+            try {
+                internalMsg.senderBalance = web3.fromWei(web3.eth.getBalance(tf.senderAddress), "ether")
+                internalMsg.senderAddress = tf.senderAddress
+            } catch (e) {
+                console.log(`Bad sender: ${tf.senderAddress}: ${e.toString()}`)
+            }
+            try {
+                internalMsg.recipientBalance = web3.fromWei(web3.eth.getBalance(tf.recipientAddress), "ether")
+                internalMsg.recipientAddress = tf.recipientAddress
+            } catch (e) {
+                console.log(`Bad recipient ${tf.recipientAddress}: ${e.toString()}`)
+            }
+
+            send(internalMsg)
         })
-        process.stdout.write(">")
     })
     process.stdout.write(block.transactions.length + " transaction(s) sent")
 })
+
+function send(msg) {
+    var data = JSON.stringify(msg)
+    var headers = { Authorization: 'token gZHlcFf-R3mqTzOgN16SXA' }
+    restler.post(STREAMR_HTTP_API_URL, { data, headers }).on("complete", (result, response) => {
+        if (!response || response.statusCode != 204 && response.statusCode != 200) {
+            console.log(result)     // error probably
+        } else {
+            process.stdout.write("<")
+        }
+    })
+    process.stdout.write(">")
+}
