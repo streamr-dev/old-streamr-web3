@@ -23,8 +23,8 @@ describe("ethCall", () => {
 describe("ethSend", () => {
     it("should return the usual stuff if successful", function () {
         this.timeout(0)     // disable timeout
-        from = web3.eth.accounts[0]
-        to = web3.eth.accounts[1]
+        from = "0x9e3d69305da51f34ee29bfb52721e3a824d59e69"
+        to = "0xddc8963569bc7f237fee4eaf129d26d276fcf22e"
         return ethSend(from, to, 1).then(result => {
             assert.equal(result.valueReceived, 1)
         })
