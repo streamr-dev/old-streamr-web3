@@ -53,7 +53,8 @@ function send(payload) {
     })
 }
 
-currentId = 1234
+var currentId = 1234
+var currentNonce = null
 
 function sendAsync(payload, callback) {
     // eslint-disable-line
@@ -66,7 +67,12 @@ function sendAsync(payload, callback) {
     // build raw tx payload with nonce and gasprice
     let rawTx = payload.params[0]
     if (!rawTx.nonce) {
-        rawTx.nonce = raw_web3.eth.getTransactionCount(rawTx.from, "latest")
+        if (!currentNonce) {
+            currentNonce = raw_web3.eth.getTransactionCount(rawTx.from, "latest")
+        } else {
+            currentNonce++;
+        }
+        rawTx.nonce = currentNonce
     }
     if (!rawTx.gasprice) {
         rawTx.gasPrice = raw_web3.eth.gasPrice
