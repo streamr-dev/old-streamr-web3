@@ -60,8 +60,9 @@ function getNonce() {
     if (currentNonce == null) {
         currentNonce = raw_web3.eth.getTransactionCount(rawTx.from, "latest")
     } else {
-        currentNonce++;
+        currentNonce++
     }
+    return currentNonce
 }
 
 function sendAsync(payload, callback) {
