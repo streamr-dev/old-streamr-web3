@@ -36,7 +36,7 @@ function send(payload) {
     // build raw tx payload with nonce and gasprice
     let rawTx = payload.params[0]
     if (!rawTx.nonce) {
-        rawTx.nonce = raw_web3.eth.getTransactionCount(rawTx.from, "latest")
+        rawTx.nonce = getNonce()
     }
     if (!rawTx.gasprice) {
         rawTx.gasPrice = raw_web3.eth.gasPrice
@@ -56,6 +56,14 @@ function send(payload) {
 var currentId = 1234
 var currentNonce = null
 
+function getNonce() {
+    if (currentNonce == null) {
+        currentNonce = raw_web3.eth.getTransactionCount(rawTx.from, "latest")
+    } else {
+        currentNonce++;
+    }
+}
+
 function sendAsync(payload, callback) {
     // eslint-disable-line
     var self = this;
@@ -67,12 +75,7 @@ function sendAsync(payload, callback) {
     // build raw tx payload with nonce and gasprice
     let rawTx = payload.params[0]
     if (!rawTx.nonce) {
-        if (!currentNonce) {
-            currentNonce = raw_web3.eth.getTransactionCount(rawTx.from, "latest")
-        } else {
-            currentNonce++;
-        }
-        rawTx.nonce = currentNonce
+        rawTx.nonce = getNonce()
     }
     if (!rawTx.gasprice) {
         rawTx.gasPrice = raw_web3.eth.gasPrice
