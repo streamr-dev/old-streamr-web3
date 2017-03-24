@@ -55,6 +55,38 @@ function send(payload) {
 
 currentId = 1234
 
+function sendAsync(payload, callback) {
+    // eslint-disable-line
+    var self = this;
+    if (payload.method !== 'eth_sendTransaction') {
+        raw_httpProvider.sendAsync(payload, callback);
+        return
+    }
+
+    // build raw tx payload with nonce and gasprice
+    let rawTx = payload.params[0]
+    if (!rawTx.nonce) {
+        rawTx.nonce = raw_web3.eth.getTransactionCount(rawTx.from, "latest")
+    }
+    if (!rawTx.gasprice) {
+        rawTx.gasPrice = raw_web3.eth.gasPrice
+    }
+    if (!rawTx.gas) {
+        rawTx.gas = "0x200000"
+    }
+
+    // sign transaction with raw tx payload
+    var signedHexPayload = signTransaction(rawTx)
+
+    // send payload
+    raw_httpProvider.sendAsync({
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        method: 'eth_sendRawTransaction',
+        params: [signedHexPayload]
+    }, callback);
+}
+
 /**
  * Send async override
  * Adapted from https://github.com/ethjs/ethjs-provider-signer
@@ -64,7 +96,7 @@ currentId = 1234
  * @param {Function} callback the send async callback
  * @callback {Object} output the XMLHttpRequest payload
  */
-function sendAsync(payload, callback) {
+function sendAsync_spede(payload, callback) {
     // eslint-disable-line
     var self = this;
     if (payload.method !== 'eth_sendTransaction') {
