@@ -54,15 +54,15 @@ function send(payload) {
 }
 
 var currentId = 1234
-var currentNonce = null
+var currentNonce = {}
 
 function getNonce(account) {
-    if (currentNonce == null) {
-        currentNonce = raw_web3.eth.getTransactionCount(account, "latest")
+    if (currentNonce[account] == null) {
+        currentNonce[account] = raw_web3.eth.getTransactionCount(account, "latest")
     } else {
-        currentNonce++
+        currentNonce[account]++
     }
-    return currentNonce
+    return currentNonce[account]
 }
 
 function sendAsync(payload, callback) {
