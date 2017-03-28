@@ -44,6 +44,13 @@ function ethSend(from, to, value) {
     })
 }
 
+// fetch events from tx according to ABI
+function getEvents(abi, address, tx) {
+    const tr = web3.eth.getTransactionReceipt(tx)
+    return getEventsFromLogs(tr.logs, abi, address)
+}
+
+
 function transactionPromise(from, to, abi, getTransaction) {
     const srcBalanceBefore = web3.eth.getBalance(from)
     const dstBalanceBefore = web3.eth.getBalance(to)
@@ -80,23 +87,11 @@ function transactionPromise(from, to, abi, getTransaction) {
             nonce: +t.nonce,
             gasUsed: +tr.cumulativeGasUsed,
             blockNumber: +tr.blockNumber
-        }        
-        
-        // cryptographic (sha3) signature used to recognize event in transaction receipt -> event 
-        if (abi) {
-            eventsBySignature = _(abi)
-                .filter(m => m.type === "event")
-                .map(m => [new SolidityEvent(null, m, null).signature(), m])
-                .fromPairs()
+        }
 
-            // events that were fired during transaction execution
-            ret.events = _(tr.logs).map(log => {
-                const sig = log.topics[0].replace("0x", "")
-                const event = eventsBySignature.get(sig)
-                const types = event.inputs.map(i => i.type)
-                const rawArgs = log.data.replace("0x", "")
-                return [event.name, SolidityCoder.decodeParams(types, rawArgs)]
-            }).fromPairs().value()
+        // events that were fired during transaction execution (except for simple send)
+        if (abi) {
+            ret.events = getEventsFromLogs(tr.logs, abi)
         }
 
         return ret
@@ -106,8 +101,32 @@ function transactionPromise(from, to, abi, getTransaction) {
     })
 }
 
+// optionally filter by address
+function getEventsFromLogs(logs, abi, address) {
+    if (!logs.length) {
+        console.log("Received empty/undefined 'logs' for getEventsFromLogs")
+        return []
+    }
+
+    // cryptographic (sha3) signature used to recognize event in transaction receipt -> event
+    eventsBySignature = _(abi)
+        .filter(m => m.type === "event")
+        .map(m => [new SolidityEvent(null, m, null).signature(), m])
+        .fromPairs()
+
+    return _(logs).map(log => {
+        if (address && address !== log.address) { return }
+        const sig = log.topics[0].replace("0x", "")
+        const event = eventsBySignature.get(sig)
+        if (!event) { return }
+        const types = event.inputs.map(i => i.type)
+        const rawArgs = log.data.replace("0x", "")
+        return [event.name, SolidityCoder.decodeParams(types, rawArgs)]
+    }).filter().fromPairs().value()
+}
+
 function wrapArray(maybeArray) {
     return _(maybeArray).isArray() ? maybeArray : [maybeArray]
 }
 
-module.exports = {ethCall, ethSend}
+module.exports = {ethCall, ethSend, getEvents}

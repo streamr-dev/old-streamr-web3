@@ -11,6 +11,10 @@ function getInternalTransfers(provider, txHash, txTo) {
         jsonrpc: "2.0",
         id: "2"
     }).result
+    if (!trace) {
+        console.error("Trace not received from RPC server, please start geth with --rpcapi \"eth,net,web3,debug\" and without --fast")
+        return []
+    }
     const stack = [{address: txTo}]
     const transfers = []
     _(trace.structLogs).forEach(step => {

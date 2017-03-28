@@ -5,7 +5,7 @@ var logger = require('morgan-body');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var {ethCall, ethSend} = require("./src/ethCall")
+var {ethCall, ethSend, getEvents} = require("./src/ethCall")
 var {getAbi, deployContracts} = require("./src/compileContracts")
 var getContractAt = require("./src/getContractAt")
 var web3 = require("./src/signed-web3")
@@ -60,6 +60,10 @@ router.post("/call", interceptKey, function (req, res, next) {
 
 router.post("/send", interceptKey, function (req, res, next) {
     return responsePromise(res, ethSend, [req.body.source, req.body.target, req.body.value])
+})
+
+router.post("/events", function (req, res, next) {
+    return responsePromise(res, getEvents, [req.body.abi, req.body.address, req.body.txHash])
 })
 
 router.post("/deploy", interceptKey, function (req, res, next) {
