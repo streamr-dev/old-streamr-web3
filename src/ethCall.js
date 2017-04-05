@@ -7,7 +7,7 @@ const SolidityCoder = require("web3/lib/solidity/coder.js")
 
 const THROW_ERROR_MESSAGE = "transaction rolled back after 'throw'"
 
-function ethCall(from, to, abi, functionName, args, value, gas) {
+const ethCall = function(from, to, abi, functionName, args, value, gas) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
     if (!abi) { throw new Error("Missing contract interface (abi:json)") }
@@ -34,7 +34,7 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
 }
 
 // send ether, no function call
-function ethSend(from, to, value) {
+const ethSend = function(from, to, value) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
     if (!value) { value = 0 }
@@ -45,13 +45,13 @@ function ethSend(from, to, value) {
 }
 
 // fetch events from tx according to ABI
-function getEvents(abi, address, tx) {
+const getEvents = function(abi, address, tx) {
     const tr = web3.eth.getTransactionReceipt(tx)
     return getEventsFromLogs(tr.logs, abi, address)
 }
 
 
-function transactionPromise(from, to, abi, getTransaction) {
+const transactionPromise = function(from, to, abi, getTransaction) {
     const srcBalanceBefore = web3.eth.getBalance(from)
     const dstBalanceBefore = web3.eth.getBalance(to)
     return getTransaction().then(tx => {
@@ -102,7 +102,7 @@ function transactionPromise(from, to, abi, getTransaction) {
 }
 
 // optionally filter by address
-function getEventsFromLogs(logs, abi, address) {
+const getEventsFromLogs = function(logs, abi, address) {
     if (!logs.length) {
         console.log("Received empty/undefined 'logs' for getEventsFromLogs")
         return []
@@ -149,7 +149,7 @@ function getEventsFromLogs(logs, abi, address) {
     }).filter().fromPairs().value()
 }
 
-function wrapArray(maybeArray) {
+const wrapArray = function(maybeArray) {
     return _(maybeArray).isArray() ? maybeArray : [maybeArray]
 }
 

@@ -5,7 +5,7 @@ const web3 = require("./signed-web3")
 const solc = require("solc")
 const ContractFactory = require("web3/lib/web3/contract")
 
-function getAbi(code) {
+const getAbi = function(code) {
     var compiled = solc.compile(code)
     var contracts = _(compiled.contracts).map((c, rawName) => {
         var name = (rawName[0] == ":") ? rawName.slice(1) : rawName
@@ -17,7 +17,7 @@ function getAbi(code) {
     return {contracts, errors}
 }
 
-function deployContracts(code, constructorParams, from, value) {
+const deployContracts = function(code, constructorParams, from, value) {
     if (!code) { throw new Error("Must provide code to deploy (code:string)") }
     if (!constructorParams) { constructorParams = [] }
     if (!from) { throw new Error("Must provide sender account (from:address)") }

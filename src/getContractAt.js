@@ -7,7 +7,7 @@ const web3 = require("./signed-web3")
 // https://etherscan.io/myapikey (testnet seems to work without)
 //const API_KEY = "EKGYIQ8GW3F96C1PQAP6UV3MW8M4R7AJAI"
 
-function getContractAt(address) {
+const getContractAt = function(address) {
     if (!address) { throw new Error("'at' query parameter required (contract address)") }
     var bytecode = web3.eth.getCode(address)
     if (bytecode.length < 3) { throw new Error("no contract at " + address) }

@@ -8,14 +8,9 @@ const raw_httpProvider = new HttpProvider("http://localhost:8545")
 const raw_web3 = new Web3(raw_httpProvider)
 
 const signed_httpProvider = new HttpProvider("http://localhost:8545")
-signed_httpProvider.send = send
-signed_httpProvider.sendAsync = sendAsync
 const signed_web3 = new Web3(signed_httpProvider)
-signed_web3.streamr = {setKeyForAddress, signTransaction}
 
-module.exports = signed_web3
-
-function signTransaction(rawTx) {
+const signTransaction = function(rawTx) {
     const key = keys[rawTx.from]
     if (!key) { throw new Error("Missing key for " + rawTx.from) }
     console.log(`signing ${JSON.stringify(rawTx)} with ${key}`)
@@ -23,12 +18,12 @@ function signTransaction(rawTx) {
 }
 
 const keys = {}
-function setKeyForAddress(address, key) {
+const setKeyForAddress = function(address, key) {
     keys[address] = key
 }
 
 // ethjs-provider-signer only implements sendAsync below, so here's its sync version
-function send(payload) {
+const sendSync = function(payload) {
     if (payload.method !== 'eth_sendTransaction') {
         return raw_httpProvider.send(payload)
     }
@@ -56,7 +51,7 @@ function send(payload) {
 var currentId = 1234
 var currentNonce = {}
 
-function getNonce(account) {
+const getNonce = function(account) {
     if (currentNonce[account] == null) {
         currentNonce[account] = raw_web3.eth.getTransactionCount(account, "latest")
     } else {
@@ -65,7 +60,7 @@ function getNonce(account) {
     return currentNonce[account]
 }
 
-function sendAsync(payload, callback) {
+const sendAsync = function(payload, callback) {
     // eslint-disable-line
     var self = this;
     if (payload.method !== 'eth_sendTransaction') {
@@ -106,7 +101,7 @@ function sendAsync(payload, callback) {
  * @param {Function} callback the send async callback
  * @callback {Object} output the XMLHttpRequest payload
  */
-function sendAsync_spede(payload, callback) {
+const sendAsync_spede = function(payload, callback) {
     // eslint-disable-line
     var self = this;
     if (payload.method !== 'eth_sendTransaction') {
@@ -160,3 +155,9 @@ function sendAsync_spede(payload, callback) {
         });
     });
 }
+
+signed_httpProvider.send = sendSync;
+signed_httpProvider.sendAsync = sendAsync;
+signed_web3.streamr = {setKeyForAddress, signTransaction};
+
+module.exports = signed_web3

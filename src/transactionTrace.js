@@ -4,7 +4,7 @@ const _ = require("lodash")
  * @see https://github.com/Arachnid/etherquery/blob/master/etherquery/trace.go#L106
  * TODO: CREATE, CALLCODE, DELEGATECALL, SUICIDE
  */
-function getInternalTransfers(provider, txHash, txTo) {
+const getInternalTransfers = function(provider, txHash, txTo) {
     const trace = provider.send({
         method: "debug_traceTransaction",
         params: [txHash, {}],
