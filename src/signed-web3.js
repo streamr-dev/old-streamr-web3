@@ -53,9 +53,9 @@ function send(payload) {
     })
 }
 
-var currentId = 1234
+// keep track of the nonce of each account
+// TODO: this seems hazardous, if transactions for the account could also be sent from elsewhere
 var currentNonce = {}
-
 function getNonce(account) {
     if (currentNonce[account] == null) {
         currentNonce[account] = raw_web3.eth.getTransactionCount(account, "latest")
@@ -76,7 +76,7 @@ function sendAsync(payload, callback) {
     // build raw tx payload with nonce and gasprice
     let rawTx = payload.params[0]
     if (!rawTx.nonce) {
-        rawTx.nonce = getNonce(rawTx.from)
+        rawTx.nonce = getNonce(rawTx.from)  // TODO: should be just  raw_web3.eth.getTransactionCount(rawTx.from, "latest")
     }
     if (!rawTx.gasprice) {
         rawTx.gasPrice = raw_web3.eth.gasPrice
@@ -95,68 +95,4 @@ function sendAsync(payload, callback) {
         method: 'eth_sendRawTransaction',
         params: [signedHexPayload]
     }, callback);
-}
-
-/**
- * Send async override
- * Adapted from https://github.com/ethjs/ethjs-provider-signer
- *
- * @method sendAsync
- * @param {payload} payload the input data payload
- * @param {Function} callback the send async callback
- * @callback {Object} output the XMLHttpRequest payload
- */
-function sendAsync_spede(payload, callback) {
-    // eslint-disable-line
-    var self = this;
-    if (payload.method !== 'eth_sendTransaction') {
-        raw_httpProvider.sendAsync(payload, callback);
-        return
-    }
-    
-    // get the nonce, if any
-    raw_httpProvider.sendAsync({
-        jsonrpc: "2.0",
-        id: currentId++,
-        method: 'eth_getTransactionCount',
-        params: [payload.params[0].from, 'latest']
-    }, function (nonceError, nonceResponse) {
-        // eslint-disable-line
-        if (nonceError) {
-            return callback(new Error('[ethjs-provider-signer] while getting nonce: ' + nonceError), null);
-        }
-
-        // get the gas price, if any
-        raw_httpProvider.sendAsync({
-            jsonrpc: "2.0",
-            id: currentId++,
-            method: 'eth_gasPrice'
-        }, function (gasPriceError, gasPriceResponse) {
-            // eslint-disable-line
-            if (gasPriceError) {
-                return callback(new Error('[ethjs-provider-signer] while getting gasPrice: ' + gasPriceError), null);
-            }
-
-            // build raw tx payload with nonce and gasprice as defaults to be overriden
-            var rawTxPayload = Object.assign({
-                nonce: nonceResponse.result + (+new Date()),
-                gasPrice: gasPriceResponse.result,
-                gas: "0x200000"
-            }, payload.params[0]);
-
-            // sign transaction with raw tx payload
-            var signedHexPayload = signTransaction(rawTxPayload)
-
-            // create new output payload
-            var outputPayload = Object.assign({}, {
-                id: payload.id,
-                jsonrpc: payload.jsonrpc,
-                method: 'eth_sendRawTransaction',
-                params: [signedHexPayload]
-            });
-
-            // send payload
-            raw_httpProvider.sendAsync(outputPayload, callback);
-        });
-    });
 }
