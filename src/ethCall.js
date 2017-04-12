@@ -7,6 +7,8 @@ const SolidityCoder = require("web3/lib/solidity/coder.js")
 
 const THROW_ERROR_MESSAGE = "transaction rolled back after 'throw'"
 
+const ETHEREUM_TIMEOUT_MS = 60 * 1000
+
 function ethCall(from, to, abi, functionName, args, value, gas) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
@@ -70,10 +72,16 @@ function transactionPromise(from, to, abi, getTransaction) {
                     const tr = web3.eth.getTransactionReceipt(tx)
                     if (tr) {
                         console.log("Got receipt: " + JSON.stringify(tr))
+                        clearTimeout(timeoutHandle)
                         filter.stopWatching()
                         done({srcBalanceBefore, dstBalanceBefore, tx, tr, t})
                     }
                 })
+                const timeoutHandle = setTimeout(() => {
+                    fail(new Error("Transaction timed out: " + tx))
+                    clearTimeout(timeoutHandle)
+                    filter.stopWatching()
+                }, ETHEREUM_TIMEOUT_MS)
             })
         }
     }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr, t}) => {
