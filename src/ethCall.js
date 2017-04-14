@@ -5,9 +5,24 @@ const Promise = require("bluebird")
 const SolidityEvent = require("web3/lib/web3/event.js")
 const SolidityCoder = require("web3/lib/solidity/coder.js")
 
+const BN = require("bignumber.js")
+
 const THROW_ERROR_MESSAGE = "transaction rolled back after 'throw'"
 
 const ETHEREUM_TIMEOUT_MS = 60 * 1000
+
+// try to cast into BigNumber; if not possible, just use as-is
+function getBytes(string) {
+    try {
+        if (string.startsWith("0x")) {
+            return new BN(string)
+        } else {
+            return new BN("0x" + string)
+        }
+    } catch (e) {
+        return string
+    }
+}
 
 function ethCall(from, to, abi, functionName, args, value, gas) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
@@ -25,12 +40,17 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
 
     const functionMetadata = _(abi).find(m => m.type === "function" && m.name === functionName)
     if (!functionMetadata) { throw new Error(functionName + " not found in ABI") }
+
+    // "bytes"
+    const modifiedArgs = _.zip(functionMetadata.inputs, args).map(([input, arg]) =>
+        input.type.startsWith("bytes") ? getBytes(arg) : arg)
+
     if (functionMetadata.constant) {
-        const res = func.call(...args)
+        const res = func.call(...modifiedArgs)
         return Promise.resolve({results: wrapArray(res)})
     } else {
         return transactionPromise(from, to, abi, () => {
-            return Promise.promisify(func.sendTransaction)(...args, {from, value, gas})
+            return Promise.promisify(func.sendTransaction)(...modifiedArgs, {from, value, gas})
         })
     }
 }

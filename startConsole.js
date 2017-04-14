@@ -1,5 +1,6 @@
 var _ = require("lodash")
 var Table = require("cli-table")
+var BN = require("bignumber.js")
 
 var Web3 = require("web3")
 var web3 = new Web3()
@@ -11,6 +12,7 @@ const ctx = repl.start().context
 ctx.web3 = web3
 ctx.lo = _
 ctx.e = web3.eth
+ctx.N = x => new BN(x) 
 
 ctx.B = function (i) { return web3.eth.getBalance(web3.eth.accounts[i]).toString() }
 ctx.b = function (i) { return web3.fromWei(web3.eth.getBalance(web3.eth.accounts[i]), "ether").toString() }

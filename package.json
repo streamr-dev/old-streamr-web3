@@ -9,6 +9,7 @@
     "console": "node ./startConsole.js"
   },
   "dependencies": {
+    "bignumber.js": "^4.0.1",
     "bluebird": "^3.4.7",
     "body-parser": "~1.15.2",
     "cookie-parser": "~1.4.3",
