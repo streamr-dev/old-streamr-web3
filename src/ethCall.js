@@ -78,9 +78,9 @@ function transactionPromise(from, to, abi, getTransaction) {
                     }
                 })
                 const timeoutHandle = setTimeout(() => {
-                    fail(new Error("Transaction timed out: " + tx))
                     clearTimeout(timeoutHandle)
                     filter.stopWatching()
+                    fail(new Error("Transaction timed out: " + tx))
                 }, ETHEREUM_TIMEOUT_MS)
             })
         }
