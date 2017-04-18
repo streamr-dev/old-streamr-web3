@@ -47,6 +47,7 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
 
     if (functionMetadata.constant) {
         const res = func.call(...modifiedArgs)
+        console.log("Called " + functionName + ", got result " + JSON.stringify(res))
         return Promise.resolve({results: wrapArray(res)})
     } else {
         return transactionPromise(from, to, abi, () => {
