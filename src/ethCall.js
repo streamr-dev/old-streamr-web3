@@ -115,7 +115,8 @@ function transactionPromise(from, to, abi, getTransaction) {
             gasPrice: +t.gasPrice,
             nonce: +t.nonce,
             gasUsed: +tr.cumulativeGasUsed,
-            blockNumber: +tr.blockNumber
+            blockNumber: +tr.blockNumber,
+            txHash: tx
         }
 
         // events that were fired during transaction execution (except for simple send)
