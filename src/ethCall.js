@@ -11,16 +11,26 @@ const THROW_ERROR_MESSAGE = "transaction rolled back after 'throw'"
 
 const ETHEREUM_TIMEOUT_MS = 60 * 1000
 
-// try to cast into BigNumber; if not possible, just use as-is
-function getBytes(string) {
+// try to cast bytes into BigNumber; if not possible, just use as-is
+function convertHex(bytesArg) {
     try {
-        if (string.startsWith("0x")) {
-            return new BN(string)
+        if (_.isArray(bytesArg)) {
+            // convert all or nothing
+            return bytesArg.map(getHex)
         } else {
-            return new BN("0x" + string)
+            return getHex(bytesArg)
         }
     } catch (e) {
-        return string
+        return bytesArg
+    }
+}
+
+// throws if string isn't valid hex
+function getHex(string) {
+    if (string.startsWith("0x")) {
+        return new BN(string)
+    } else {
+        return new BN("0x" + string)
     }
 }
 
@@ -41,9 +51,9 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
     const functionMetadata = _(abi).find(m => m.type === "function" && m.name === functionName)
     if (!functionMetadata) { throw new Error(functionName + " not found in ABI") }
 
-    // "bytes"
+    // bytes, bytesXX, bytes[], bytes[X] special handling
     const modifiedArgs = _.zip(functionMetadata.inputs, args).map(([input, arg]) =>
-        input.type.startsWith("bytes") ? getBytes(arg) : arg)
+        input.type.startsWith("bytes") ? convertHex(arg) : arg)
 
     if (functionMetadata.constant) {
         const res = func.call(...modifiedArgs)
