@@ -31,11 +31,13 @@ var router = express.Router()
 // any api handler that uses (signed) sendTransaction needs to hand over the private key first
 function interceptKey(req, res, next) {
     if (!req.body.source) {
-        res.send({error: "Must specify transaction source address (source:string)"})
+        res.send({errors: ["Must specify transaction source address (source:string)"]})
     } else if (!req.body.key) {
-        res.send({error: "Must specify private key to sign transactions with (key:string)"})
+        res.send({errors: ["Must specify private key to sign transactions with (key:string)"]})
     } else {
-        web3.streamr.setKeyForAddress(req.body.source, req.body.key)
+        const keyHex = (req.body.key.startsWith("0x") ? "" : "0x") + req.body.key
+        const sourceHex = (req.body.source.startsWith("0x") ? "" : "0x") + req.body.source
+        web3.streamr.setKeyForAddress(sourceHex, keyHex)
         next()
     }
 }
@@ -47,7 +49,7 @@ function responsePromise(res, handler, args) {
     }).then(result => {
         res.send(result)
     }).catch(e => {
-        res.send({error: e.toString()})
+        res.send({errors: [e.toString()]})
     })
 }
         
