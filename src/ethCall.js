@@ -9,7 +9,7 @@ const BN = require("bignumber.js")
 
 const THROW_ERROR_MESSAGE = "transaction rolled back after 'throw'"
 
-const ETHEREUM_TIMEOUT_MS = 60 * 1000
+const ETHEREUM_TIMEOUT_MS = 30 * 60 * 1000
 
 // try to cast bytes into BigNumber; if not possible, just use as-is
 function convertHex(bytesArg) {
