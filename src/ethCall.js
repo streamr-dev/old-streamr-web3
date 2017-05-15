@@ -88,12 +88,10 @@ function transactionPromise(from, to, abi, getTransaction) {
     const srcBalanceBefore = web3.eth.getBalance(from)
     const dstBalanceBefore = web3.eth.getBalance(to)
     return getTransaction().then(tx => {
-        const t = web3.eth.getTransaction(tx)
-        if (!t) { throw new Error("Faulty transaction: " + tx) }
         const tr = web3.eth.getTransactionReceipt(tx)
         if (tr) {
             console.log("Got receipt: " + JSON.stringify(tr))
-            return {srcBalanceBefore, dstBalanceBefore, tx, tr, t}
+            return {srcBalanceBefore, dstBalanceBefore, tx, tr}
         } else {
             // if for some reason tr won't come out AS IT SHOULD, fall back to checking every time a new block comes out
             console.log("Waiting for receipt...")
@@ -105,7 +103,7 @@ function transactionPromise(from, to, abi, getTransaction) {
                         console.log("Got receipt: " + JSON.stringify(tr))
                         clearTimeout(timeoutHandle)
                         filter.stopWatching()
-                        done({srcBalanceBefore, dstBalanceBefore, tx, tr, t})
+                        done({srcBalanceBefore, dstBalanceBefore, tx, tr})
                     }
                 })
                 const timeoutHandle = setTimeout(() => {
@@ -116,9 +114,12 @@ function transactionPromise(from, to, abi, getTransaction) {
                 }, ETHEREUM_TIMEOUT_MS)
             })
         }
-    }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr, t}) => {
+    }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr}) => {
         const srcBalanceAfter = web3.eth.getBalance(from)
         const dstBalanceAfter = web3.eth.getBalance(to)
+
+        const t = web3.eth.getTransaction(tx)
+        if (!t) { throw new Error("Faulty transaction: " + tx) }
 
         const ret = {
             valueSent: srcBalanceBefore.minus(srcBalanceAfter).toNumber(),
