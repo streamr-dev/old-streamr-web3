@@ -4,10 +4,10 @@ const Web3 = require("web3")
 const HttpProvider = require("web3/lib/web3/httpprovider")
 
 // "raw" one will be used to talk to RPC server, only send/sendAsync overridden
-const raw_httpProvider = new HttpProvider("http://localhost:8545")
+const raw_httpProvider = new HttpProvider("https://rinkeby.infura.io")
 const raw_web3 = new Web3(raw_httpProvider)
 
-const signed_httpProvider = new HttpProvider("http://localhost:8545")
+const signed_httpProvider = new HttpProvider("https://rinkeby.infura.io")
 signed_httpProvider.send = send
 signed_httpProvider.sendAsync = sendAsync
 const signed_web3 = new Web3(signed_httpProvider)
