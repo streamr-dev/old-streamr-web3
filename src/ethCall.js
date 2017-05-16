@@ -41,7 +41,7 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
     if (!functionName) { throw new Error("Missing function name (function:string)") }
     if (!args) { args = [] }
     if (!value) { value = 0 }
-    if (!gas) { gas = 2000000 }
+    if (!gas) { gas = 4000000 }
     to = to.trim()
 
     const contract = web3.eth.contract(abi).at(to)
@@ -111,6 +111,7 @@ function transactionPromise(from, to, abi, getTransaction) {
                 const timeoutHandle = setTimeout(() => {
                     clearTimeout(timeoutHandle)
                     filter.stopWatching()
+                    console.log("Timed out waiting for transaction receipt: "+tx+", failing promise")
                     fail(new Error("Transaction timed out: " + tx))
                 }, ETHEREUM_TIMEOUT_MS)
             })
