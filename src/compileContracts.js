@@ -17,7 +17,7 @@ function getAbi(code) {
     return {contracts, errors}
 }
 
-function deployContracts(code, constructorParams, from, value) {
+function deployContracts(code, constructorParams, from, value, gasPrice) {
     if (!code) { throw new Error("Must provide code to deploy (code:string)") }
     if (!constructorParams) { constructorParams = [] }
     if (!from) { throw new Error("Must provide sender account (from:address)") }
@@ -33,7 +33,7 @@ function deployContracts(code, constructorParams, from, value) {
         var gas = web3.eth.estimateGas({data}) * 2
         // TODO: check and typecast constructorParams (ESPECIALLY addresses, but also e.g. BigIntegers)
         var p = new Promise((done, fail) => {
-            var instance = Contract.new(...constructorParams, {from, value, data, gas})
+            var instance = Contract.new(...constructorParams, {from, value, data, gas, gasPrice})
             var filter = web3.eth.filter("latest").watch((e, block) => {
                 // Contract.new will assign the address directly in the instance when it gets it
                 //   there is a bit of a race condition here though: internally Contract.new also watches "latest", so

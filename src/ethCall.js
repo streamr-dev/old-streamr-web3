@@ -34,7 +34,7 @@ function getHex(string) {
     }
 }
 
-function ethCall(from, to, abi, functionName, args, value, gas) {
+function ethCall(from, to, abi, functionName, args, value, gas, gasPrice) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
     if (!abi) { throw new Error("Missing contract interface (abi:json)") }
@@ -42,6 +42,7 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
     if (!args) { args = [] }
     if (!value) { value = 0 }
     if (!gas) { gas = 4000000 }
+    if (!gasPrice) { gasPrice = 2e9 }
     to = to.trim()
 
     const contract = web3.eth.contract(abi).at(to)
@@ -61,19 +62,23 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
         return Promise.resolve({results: wrapArray(res)})
     } else {
         return transactionPromise(from, to, abi, () => {
-            return Promise.promisify(func.sendTransaction)(...modifiedArgs, {from, value, gas})
+            let callParams = {from, value, gas}
+            if (gasPrice) { callParams.gasPrice = gasPrice }
+            return Promise.promisify(func.sendTransaction)(...modifiedArgs, callParams)
         })
     }
 }
 
 // send ether, no function call
-function ethSend(from, to, value) {
+function ethSend(from, to, value, gasPrice) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
-    if (!value) { value = 0 }
+    if (!(value > 0)) { throw new Error("Must specify ether amount to send (value:wei)") }
 
     return transactionPromise(from, to, null, () => {
-        return Promise.promisify(web3.eth.sendTransaction)({from, to, value})
+        let callParams = {from, to, value}
+        if (gasPrice) { callParams.gasPrice = gasPrice }
+        return Promise.promisify(web3.eth.sendTransaction)(callParams)
     })
 }
 
