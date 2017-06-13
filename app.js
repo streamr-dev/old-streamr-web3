@@ -56,12 +56,13 @@ function responsePromise(res, handler, args) {
 router.post("/call", interceptKey, function (req, res, next) {
     return responsePromise(res, ethCall, [
         req.body.source, req.body.target,
-        req.body.abi, req.body.function, req.body.arguments, req.body.value
+        req.body.abi, req.body.function, req.body.arguments,
+        req.body.value, req.body.gas, req.body.gasprice
     ])
 })
 
 router.post("/send", interceptKey, function (req, res, next) {
-    return responsePromise(res, ethSend, [req.body.source, req.body.target, req.body.value])
+    return responsePromise(res, ethSend, [req.body.source, req.body.target, req.body.value, req.body.gasprice])
 })
 
 router.post("/events", function (req, res, next) {
@@ -69,7 +70,7 @@ router.post("/events", function (req, res, next) {
 })
 
 router.post("/deploy", interceptKey, function (req, res, next) {
-    return responsePromise(res, deployContracts, [req.body.code, req.body.args, req.body.source, req.body.value])
+    return responsePromise(res, deployContracts, [req.body.code, req.body.args, req.body.source, req.body.value, req.body.gasprice])
 })
 
 router.get("/contract", function (req, res, next) {

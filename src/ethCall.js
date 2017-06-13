@@ -34,7 +34,7 @@ function getHex(string) {
     }
 }
 
-function ethCall(from, to, abi, functionName, args, value, gas) {
+function ethCall(from, to, abi, functionName, args, value, gas, gasPrice) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
     if (!abi) { throw new Error("Missing contract interface (abi:json)") }
@@ -42,6 +42,7 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
     if (!args) { args = [] }
     if (!value) { value = 0 }
     if (!gas) { gas = 4000000 }
+    if (!gasPrice) { gasPrice = 2e9 }
     to = to.trim()
 
     const contract = web3.eth.contract(abi).at(to)
@@ -61,19 +62,23 @@ function ethCall(from, to, abi, functionName, args, value, gas) {
         return Promise.resolve({results: wrapArray(res)})
     } else {
         return transactionPromise(from, to, abi, () => {
-            return Promise.promisify(func.sendTransaction)(...modifiedArgs, {from, value, gas})
+            let callParams = {from, value, gas}
+            if (gasPrice) { callParams.gasPrice = gasPrice }
+            return Promise.promisify(func.sendTransaction)(...modifiedArgs, callParams)
         })
     }
 }
 
 // send ether, no function call
-function ethSend(from, to, value) {
+function ethSend(from, to, value, gasPrice) {
     if (typeof from != "string") { throw new Error("Must specify sender account (from:address)") }
     if (typeof to != "string") { throw new Error("Must specify target address (to:address)") }
-    if (!value) { value = 0 }
+    if (!(value > 0)) { throw new Error("Must specify ether amount to send (value:wei)") }
 
     return transactionPromise(from, to, null, () => {
-        return Promise.promisify(web3.eth.sendTransaction)({from, to, value})
+        let callParams = {from, to, value}
+        if (gasPrice) { callParams.gasPrice = gasPrice }
+        return Promise.promisify(web3.eth.sendTransaction)(callParams)
     })
 }
 
@@ -88,12 +93,10 @@ function transactionPromise(from, to, abi, getTransaction) {
     const srcBalanceBefore = web3.eth.getBalance(from)
     const dstBalanceBefore = web3.eth.getBalance(to)
     return getTransaction().then(tx => {
-        const t = web3.eth.getTransaction(tx)
-        if (!t) { throw new Error("Faulty transaction: " + tx) }
         const tr = web3.eth.getTransactionReceipt(tx)
         if (tr) {
             console.log("Got receipt: " + JSON.stringify(tr))
-            return {srcBalanceBefore, dstBalanceBefore, tx, tr, t}
+            return {srcBalanceBefore, dstBalanceBefore, tx, tr}
         } else {
             // if for some reason tr won't come out AS IT SHOULD, fall back to checking every time a new block comes out
             console.log("Waiting for receipt...")
@@ -105,7 +108,7 @@ function transactionPromise(from, to, abi, getTransaction) {
                         console.log("Got receipt: " + JSON.stringify(tr))
                         clearTimeout(timeoutHandle)
                         filter.stopWatching()
-                        done({srcBalanceBefore, dstBalanceBefore, tx, tr, t})
+                        done({srcBalanceBefore, dstBalanceBefore, tx, tr})
                     }
                 })
                 const timeoutHandle = setTimeout(() => {
@@ -116,9 +119,12 @@ function transactionPromise(from, to, abi, getTransaction) {
                 }, ETHEREUM_TIMEOUT_MS)
             })
         }
-    }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr, t}) => {
+    }).then(({srcBalanceBefore, dstBalanceBefore, tx, tr}) => {
         const srcBalanceAfter = web3.eth.getBalance(from)
         const dstBalanceAfter = web3.eth.getBalance(to)
+
+        const t = web3.eth.getTransaction(tx)
+        if (!t) { throw new Error("Faulty transaction: " + tx) }
 
         const ret = {
             valueSent: srcBalanceBefore.minus(srcBalanceAfter).toNumber(),
