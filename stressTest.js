@@ -15,8 +15,13 @@
  */
 
 const rest = require("restling");
+const Promise = require('bluebird')
 
 const streamrWeb3Server = "localhost:3001"
+const reportingInterval = 1
+const concurrency = 30
+const initialSendIntervalMs = 50000
+
 const source = "0xb3428050eA2448eD2E4409bE47E1a50EBac0B2d2"
 const key = "6e340f41a1c6e03e6e0a4e9805d1cea342f6a299e7c931d6f3da6dd34cb6e17d"
 const target = "0x60f78aa68266c87fecec6dcb27672455111bb347"
@@ -49,19 +54,50 @@ const abi = [{"constant":true,"inputs":[],"name":"logSize","outputs":[{"name":""
 }
 */
 
-const url = "http://" + streamrWeb3Server + "/call"
-const body = {
-    function: "addToLog",
-    arguments: [Date.now()],
-    source,
-    key,
-    target,
-    abi
+// send out `concurrency` requests that will re-start when complete and keep looping
+var initialized = 0
+function startHammering() {
+    sendRequest()
+    setTimeout(() => {
+        initialized++
+        if (initialized < concurrency) {
+            startHammering()
+        }
+    }, initialSendIntervalMs)
 }
+startHammering()
 
-console.log("Sending " + JSON.stringify(body))
-rest.postJson(url, body).then(res => {
-    console.log(res.data)
-}).catch(e => {
-    console.error(e)
-})
+var sent = 0
+var received = 0
+var failed = 0
+var pending = 0
+function sendRequest() {
+    const url = "http://" + streamrWeb3Server + "/call"
+    const body = {
+        function: "addToLog",
+        arguments: [Date.now()],
+        source,
+        key,
+        target,
+        abi
+    }
+
+    sent++
+    pending++
+    rest.postJson(url, body).then(res => {
+        if (!res || !res.data) { throw new Error("Bad response") }
+        if (res.data.errors) { throw new Error(JSON.stringify(res.data.errors)) }
+        received++
+    }).catch(e => {
+        failed++
+        if (failed < 10) {
+            console.error(e)
+        }
+    }).then(() => {
+        pending--
+    }).then(sendRequest)
+
+    if (sent % reportingInterval == 0) {
+        console.log(`[${new Date().toTimeString().slice(0, 8)}] ${received} ok + ${failed} fail + ${pending} = ${sent} total`)
+    }
+}
