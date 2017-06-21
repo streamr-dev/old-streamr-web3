@@ -78,7 +78,7 @@ function sendAsync(payload, callback) {
     if (!rawTx.nonce) {
         rawTx.nonce = getNonce(rawTx.from)  // TODO: should be just  raw_web3.eth.getTransactionCount(rawTx.from, "latest")
     }
-    if (!rawTx.gasprice) {
+    if (!rawTx.gasPrice) {
         rawTx.gasPrice = raw_web3.eth.gasPrice
     }
     if (!rawTx.gas) {
