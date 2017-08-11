@@ -1,7 +1,7 @@
 var _ = require("lodash")
 var restler = require("restler")
 
-var ETHEREUM_CLIENT_URL = "http://localhost:8545"
+const serverUrl = process.env.ETHEREUM_SERVER_URL || "http://localhost:8545"
 //var STREAMR_HTTP_API_URL = "http://dev.streamr:8891/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data"
 //var STREAMR_HTTP_API_URL = "http://localhost:8080/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data"
 var STREAMR_HTTP_API_URL = "https://eth.streamr.com/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data"
@@ -10,7 +10,7 @@ const trace = require("./src/transactionTrace")
 
 var Web3 = require("web3")
 var web3 = new Web3()
-web3.setProvider(new web3.providers.HttpProvider(ETHEREUM_CLIENT_URL))
+web3.setProvider(new web3.providers.HttpProvider(serverUrl))
 var Iban = require("web3/lib/web3/iban")
 
 var filter = web3.eth.filter("latest")
