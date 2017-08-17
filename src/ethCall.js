@@ -85,7 +85,7 @@ function ethSend(from, to, value, gasPrice) {
 // fetch events from tx according to ABI
 function getEvents(abi, address, tx) {
     const tr = web3.eth.getTransactionReceipt(tx)
-    return getEventsFromLogs(tr.logs, abi, address)
+    return getEventsFromLogs(tr.logs, JSON.parse(abi), address)
 }
 
 
@@ -156,7 +156,7 @@ function getEventsFromLogs(logs, abi, address) {
     }
 
     // cryptographic (sha3) signature used to recognize event in transaction receipt -> event
-    eventsBySignature = _(abi)
+    var eventsBySignature = _(abi)
         .filter(m => m.type === "event")
         .map(m => [new SolidityEvent(null, m, null).signature(), m])
         //.map(m => [web3.eth.abi.encodeEventSignature(m), m])      // web3.js 1.0
