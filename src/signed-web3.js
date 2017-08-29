@@ -3,11 +3,13 @@ const sign = require("ethjs-signer").sign
 const Web3 = require("web3")
 const HttpProvider = require("web3/lib/web3/httpprovider")
 
+const serverUrl = process.env.ETHEREUM_SERVER_URL || "http://localhost:8546"
+
 // "raw" one will be used to talk to RPC server, only send/sendAsync overridden
-const raw_httpProvider = new HttpProvider("http://localhost:8546")
+const raw_httpProvider = new HttpProvider(serverUrl)
 const raw_web3 = new Web3(raw_httpProvider)
 
-const signed_httpProvider = new HttpProvider("http://localhost:8546")
+const signed_httpProvider = new HttpProvider(serverUrl)
 signed_httpProvider.send = send
 signed_httpProvider.sendAsync = sendAsync
 const signed_web3 = new Web3(signed_httpProvider)
