@@ -9,6 +9,7 @@ var {ethCall, ethSend, getEvents} = require("./src/ethCall")
 var {getAbi, deployContracts} = require("./src/compileContracts")
 var getContractAt = require("./src/getContractAt")
 var web3 = require("./src/signed-web3")
+var {dieIfCriticalError} = require("./src/runner")
 
 var app = express();
 
@@ -50,6 +51,7 @@ function responsePromise(res, handler, args) {
         res.send(result)
     }).catch(e => {
         res.send({errors: [e.toString()]})
+        dieIfCriticalError(e)
     })
 }
         

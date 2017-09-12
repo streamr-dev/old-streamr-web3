@@ -1,6 +1,7 @@
 const _ = require("lodash")
 const web3 = require("./signed-web3")
 const Promise = require("bluebird")
+const {bump} = require("./src/runner")
 
 const SolidityEvent = require("web3/lib/web3/event.js")
 const SolidityCoder = require("web3/lib/solidity/coder.js")
@@ -109,6 +110,8 @@ function transactionPromise(from, to, abi, getTransaction) {
                         clearTimeout(timeoutHandle)
                         filter.stopWatching()
                         done({srcBalanceBefore, dstBalanceBefore, tx, tr})
+                    } else {
+                        bump()      // prefer to die if too many waiting transactions
                     }
                 })
                 const timeoutHandle = setTimeout(() => {
