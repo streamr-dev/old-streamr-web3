@@ -1,7 +1,7 @@
 const _ = require("lodash")
 const web3 = require("./signed-web3")
 const Promise = require("bluebird")
-const {bump} = require("./src/runner")
+const {bump} = require("./runner")
 
 const SolidityEvent = require("web3/lib/web3/event.js")
 const SolidityCoder = require("web3/lib/solidity/coder.js")
