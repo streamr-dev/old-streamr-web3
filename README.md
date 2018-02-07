@@ -26,3 +26,7 @@ First console window:
 
 Second console window:
 * `mocha`
+
+## License
+
+This software is open source, and dual licensed under [AGPLv3](https://www.gnu.org/licenses/agpl.html) and an enterprise-friendly commercial license.
