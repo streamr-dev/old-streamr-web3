@@ -1,7 +1,5 @@
-# streamr-web3
-Streamr Ethereum bridge
-
-Needs to be running in the background so that Ethereum modules will work.
+# Streamr-Web3: Streamr-Ethereum bridge
+An optional service of the Streamr cloud architecture that facilitates interactions with the Ethereum blockchain. Engine-and-Editor's Ethereum modules require this service to be active in order to work.
 
 ## Dependencies
 
