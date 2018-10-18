@@ -1,20 +1,24 @@
 const _ = require("lodash")
 
-/** get internal transactions: CALL transfers
- * @see https://github.com/Arachnid/etherquery/blob/master/etherquery/trace.go#L106
- * TODO: CREATE, CALLCODE, DELEGATECALL, SUICIDE
- */
-function getInternalTransfers(provider, txHash, txTo) {
+function getRawTrace(provider, txHash) {
     const trace = provider.send({
         method: "debug_traceTransaction",
         params: [txHash, {}],
         jsonrpc: "2.0",
-        id: "2"
+        id: "1" + Date.now()
     }).result
     if (!trace) {
         console.error("Trace not received from RPC server, please start geth with --rpcapi \"eth,net,web3,debug\" and without --fast")
         return []
     }
+}
+
+/** get internal transactions: CALL transfers
+ * @see https://github.com/Arachnid/etherquery/blob/master/etherquery/trace.go#L106
+ * TODO: CREATE, CALLCODE, DELEGATECALL, SUICIDE
+ */
+function getInternalTransfers(provider, txHash, txTo) {
+    const trace = getRawTrace(provider, txHash)
     const stack = [{address: txTo}]
     const transfers = []
     _(trace.structLogs).forEach(step => {
@@ -62,4 +66,4 @@ function getInternalTransfers(provider, txHash, txTo) {
     return transfers
 }
 
-module.exports = {getInternalTransfers}
+module.exports = {getInternalTransfers, getRawTrace}
