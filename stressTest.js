@@ -1,7 +1,7 @@
-/**
- * Stress-test streamr-web3 by sending a lot of transactions
- *
- * Try to reproduce CORE-903: streamr-web3 stops getting transactions through
+/*
+ Stress-test streamr-web3 by sending a lot of transactions
+
+ Try to reproduce CORE-903: streamr-web3 stops getting transactions through
 
  After a while, streamr-web3 starts failing to get transactions through to Ethereum.
 
@@ -10,9 +10,7 @@
  Geth log shows submitted transactions (see log below)
  Restarting geth does not fix the problem
  Restarting streamr-web3 fixes the problem
-
- *
- */
+*/
 
 const rest = require("restling");
 const Promise = require('bluebird')

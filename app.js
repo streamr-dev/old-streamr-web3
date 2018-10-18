@@ -74,7 +74,7 @@ router.post("/deploy", interceptKey, function (req, res, next) {
 })
 
 router.get("/contract", function (req, res, next) {
-    return responsePromise(res, getContractAt, [req.params.at])
+    return responsePromise(res, getContractAt, [req.query.at, req.query.network])
 })
 
 router.post("/compile", function (req, res, next) {

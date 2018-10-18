@@ -1,10 +1,17 @@
 var _ = require("lodash")
 var restler = require("restler")
 
+// TODO: get also from argv
 const serverUrl = process.env.ETHEREUM_SERVER_URL || "http://localhost:8545"
-//var STREAMR_HTTP_API_URL = "http://dev.streamr:8891/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data"
-//var STREAMR_HTTP_API_URL = "http://localhost:8080/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data"
-var STREAMR_HTTP_API_URL = "https://eth.streamr.com/api/v1/streams/tYbq7AIhT0ePKNv1ozPsxQ/data"
+const streamrServerUrl = process.env.STREAMR_SERVER_URL || "https://eth.streamr.com"
+const streamId = process.env.STREAM_ID
+const streamKey = process.env.STREAM_KEY
+
+if (!streamId || !streamKey) {
+    throw new Error("STREAM_ID and STREAM_KEY environment variables required")
+}
+
+const STREAMR_HTTP_API_URL = `${streamrServerUrl}/api/v1/streams/${streamId}/data`
 
 const trace = require("./src/transactionTrace")
 
@@ -82,7 +89,7 @@ filter.watch(function (error, blockHash) {
 
 function send(msg) {
     var data = JSON.stringify(msg)
-    var headers = { Authorization: 'token gZHlcFf-R3mqTzOgN16SXA' }
+    var headers = { Authorization: 'token ' + streamKey }
     restler.post(STREAMR_HTTP_API_URL, { data, headers }).on("complete", (result, response) => {
         if (!response || response.statusCode != 204 && response.statusCode != 200) {
             console.log(result)     // error probably
