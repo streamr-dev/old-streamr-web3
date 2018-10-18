@@ -1,28 +1,39 @@
-# streamr-web3
-Streamr Ethereum bridge
+# Streamr-Web3: Streamr-Ethereum bridge
+An optional service of the Streamr cloud architecture that facilitates interactions with the Ethereum blockchain.
+Engine-and-Editor's Ethereum modules require this service to be active in order to work.
 
-Needs to be running in the background so that Ethereum modules will work.
+![Where Streamr-Web3 sits in Streamr cloud stack](high-level.png)
 
 ## Dependencies
 
 * [Node.js](https://docs.npmjs.com/getting-started/installing-node)
- * `brew install node`, `npm install npm@latest -g`, ...
 * [TestRPC Ethereum dummy-client/simulator](https://github.com/ethereumjs/testrpc)
- * `npm install -g ethereumjs-testrpc`
+
+## Building
+
+Project uses npm for package management. We provide sensible default configurations for IntelliJ IDEA but project can be
+developed with other IDEs as well.
+
+- Make sure tools from section *Dependencies* have been installed.
+- Install npm dependencies with `npm install`
+- To run tests open two console windows. Run `testrpc` on the 1st and `mocha` on the 2nd console.
  
 ## Running
 
-First console window:
-* `testrpc`
+First console window
+```
+testrpc
+```
 
-Second console window:
-* `npm install`
-* `npm start`
+Second console window
+```
+npm start
+```
 
-## Running tests
+## Publishing
 
-First console window:
-* `testrpc`
+Currently project has no CI system and/or container configured nor are any packages published to npmjs.com. 
 
-Second console window:
-* `mocha`
+## License
+
+This software is open source, and dual licensed under [AGPLv3](https://www.gnu.org/licenses/agpl.html) and an enterprise-friendly commercial license.
