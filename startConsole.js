@@ -4,7 +4,7 @@ var BN = require("bignumber.js")
 
 var Web3 = require("web3")
 var web3 = new Web3()
-web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
+web3.setProvider(new web3.providers.HttpProvider('http://94.130.70.249:8546'))
 
 const repl = require('repl')
 const ctx = repl.start().context
