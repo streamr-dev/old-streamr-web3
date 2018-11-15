@@ -1,5 +1,5 @@
 var assert = require("assert")
-var {getAbi, deployContracts} = require("../src/compileContracts")
+var {compileContracts, deployContracts} = require("../src/compileContracts")
 
 const web3 = require("../src/signed-web3")
 require("./setupTestKeys")
@@ -15,9 +15,9 @@ contract Test {
     }
 }`
 
-describe("getAbi", () => {
+describe("compileContracts", () => {
     it("should return correct ABI", () => {
-        var {contracts, errors} = getAbi(TEST_CODE)
+        var {contracts, errors} = compileContracts(TEST_CODE)
         assert.equal(contracts.length, 1)
         assert.equal(errors.length, 0)
         assert.deepEqual(contracts[0], {
@@ -47,7 +47,7 @@ describe("getAbi", () => {
 
     it("should give missing pragma warning", () => {
         var code = "contract Test {}"
-        var {contracts, errors} = getAbi(code)
+        var {contracts, errors} = compileContracts(code)
         assert.equal(contracts.length, 1)
         assert.equal(errors.length, 1)
         assert(errors[0].indexOf("pragma") > -1)
@@ -55,7 +55,7 @@ describe("getAbi", () => {
 
     it("should give errors for malformed code", () => {
         var code = "contract Test {} lol"
-        var {contracts, errors} = getAbi(code)
+        var {contracts, errors} = compileContracts(code)
         assert.equal(contracts.length, 0)
         assert.equal(errors.length, 1)
         assert(errors[0].indexOf("Error: Expected import directive or contract definition") > -1)
@@ -76,7 +76,7 @@ contract PayByUse {
 }`
         // TODO: doesn't work; the relevant userDoc/developerDoc doesn't show up in solc --natspec
         //   at least not on testrpc, maybe works on geth the real thing?
-        var {contracts, errors} = getAbi(code)
+        var {contracts, errors} = compileContracts(code)
         //assert(contracts[0].abi[0].inputs[1].conversion, "ether")
     })
 })

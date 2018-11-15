@@ -138,7 +138,7 @@ function transactionPromise(from, to, abi, getTransaction) {
 
         // events that were fired during transaction execution (except for simple send)
         if (abi) {
-            ret.events = getEventsFromLogs(tr.logs, abi)
+            ret.events = getEventsFromLogs(tr.logs, abi, to)
         }
 
         return ret
@@ -163,7 +163,11 @@ function getEventsFromLogs(logs, abi, address) {
         .fromPairs()
 
     return _(logs).map(log => {
-        if (address && address !== log.address) { return }
+
+        // address is checked so that when contract A calls contract B that emits an event, if
+        //   contract A also has same event (name + arg types), that one won't mistakenly get emitted
+        if (address && address.toLowerCase() !== log.address.toLowerCase()) { return }
+
         const sig = log.topics[0].replace("0x", "")
         const event = eventsBySignature.get(sig)
         if (!event) { return }  // continue; this could be some other contract's event, or anonymous event
@@ -183,6 +187,12 @@ function getEventsFromLogs(logs, abi, address) {
         const paramBytes = log.data.replace("0x", "")   // unindexed params go into data
         const iParamBytes = log.topics.slice(1)         // indexed params go into topics
         const paramValues = SolidityCoder.decodeParams(paramTypes, paramBytes)
+        console.log(`
+    Event: ${event.name}
+    paramTypes: ${paramTypes}
+    paramBytes: ${paramBytes}
+    iParamBytes: ${iParamBytes}
+    paramValues: ${paramValues}`)
 
         const allParamValues = event.inputs.map(i => {
             if (i.indexed) {

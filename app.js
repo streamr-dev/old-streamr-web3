@@ -6,7 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var {ethCall, ethSend, getEvents} = require("./src/ethCall")
-var {getAbi, deployContracts} = require("./src/compileContracts")
+var {compileContracts, deployContracts} = require("./src/compileContracts")
 var getContractAt = require("./src/getContractAt")
 var web3 = require("./src/signed-web3")
 
@@ -78,7 +78,7 @@ router.get("/contract", function (req, res, next) {
 })
 
 router.post("/compile", function (req, res, next) {
-    return responsePromise(res, getAbi, [req.body.code])
+    return responsePromise(res, compileContracts, [req.body.code])
 })
 
 

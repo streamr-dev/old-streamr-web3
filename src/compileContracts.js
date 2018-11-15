@@ -5,7 +5,7 @@ const web3 = require("./signed-web3")
 const solc = require("solc")
 const ContractFactory = require("web3/lib/web3/contract")
 
-function getAbi(code) {
+function compileContracts(code) {
     var compiled = solc.compile(code)
     var contracts = _(compiled.contracts).map((c, rawName) => {
         var name = (rawName[0] == ":") ? rawName.slice(1) : rawName
@@ -23,7 +23,7 @@ function deployContracts(code, constructorParams, from, value, gasPrice) {
     if (!from) { throw new Error("Must provide sender account (from:address)") }
     if (!value) { value = 0 }
 
-    var {contracts, errors} = getAbi(code)
+    var {contracts, errors} = compileContracts(code)
     var deploymentsDone = []
     _(contracts).each(c => {
         // see https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethcontract
@@ -52,4 +52,4 @@ function deployContracts(code, constructorParams, from, value, gasPrice) {
     })
 }
 
-module.exports = {getAbi, deployContracts}
+module.exports = {compileContracts, deployContracts}
