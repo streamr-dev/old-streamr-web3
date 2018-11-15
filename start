@@ -1,0 +1,1 @@
+env ETHEREUM_SERVER_URL=http://localhost:8546 PORT=3001 npm run start

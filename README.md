@@ -7,32 +7,32 @@ Engine-and-Editor's Ethereum modules require this service to be active in order 
 ## Dependencies
 
 * [Node.js](https://docs.npmjs.com/getting-started/installing-node)
-* [TestRPC Ethereum dummy-client/simulator](https://github.com/ethereumjs/testrpc)
+* [Geth](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) or [Parity]() Ethereum client
+* [Ganache the Ethereum dummy-client/simulator](https://github.com/trufflesuite/ganache-cli) for testing
 
-## Building
+## Building and running
 
-Project uses npm for package management. We provide sensible default configurations for IntelliJ IDEA but project can be
-developed with other IDEs as well.
+Project uses npm for package management. We provide sensible default configurations for IntelliJ IDEA and VSCode but project can be developed with other IDEs as well.
 
-- Make sure tools from section *Dependencies* have been installed.
 - Install npm dependencies with `npm install`
-- To run tests open two console windows. Run `testrpc` on the 1st and `mocha` on the 2nd console.
- 
-## Running
+- Run it with `./start` if your Ethereum client is running on the same machine
+- Otherwise specify `ETHEREUM_SERVER_URL` and `PORT` in environment variables and run `npm run start`
+
+## Running tests
 
 First console window
 ```
-testrpc
+./node_modules/.bin/ganache-cli -m testrpc
 ```
 
 Second console window
 ```
-npm start
+./node_modules/.bin/mocha
 ```
 
 ## Publishing
 
-Currently project has no CI system and/or container configured nor are any packages published to npmjs.com. 
+Currently project has no CI system and/or container configured nor are any packages published to npmjs.com.
 
 ## License
 
