@@ -1,6 +1,5 @@
 var _ = require("lodash")
 var rest = require("restling");
-var debug = require('debug')('getContractAt')
 
 const web3 = require("./signed-web3")
 
@@ -23,7 +22,7 @@ function getContractAt(address, networkName) {
     // TODO: Query https://etherscan.io/apis#contracts
     var url = `${serverUrl}/api?module=contract&action=getabi&address=${address}`//&apikey=${API_KEY}`
     return rest.get(url).then((response) => {
-        debug(`Response from ${url}: ${response.data}`)
+        console.log(`getContractAt: Response from ${url}: ${response.data}`)
         if (response.data.result == "") {
             return {address}
         } else {
