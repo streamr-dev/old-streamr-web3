@@ -1,8 +1,8 @@
 const web3 = require("../src/signed-web3")
 
-// testrpc default accounts
-web3.streamr.setKeyForAddress("0xb3428050ea2448ed2e4409be47e1a50ebac0b2d2", "0x6e340f41a1c6e03e6e0a4e9805d1cea342f6a299e7c931d6f3da6dd34cb6e17d")
-web3.streamr.setKeyForAddress("0xe5019d79c3fc34c811e68e68c9bd9966f22370ef", "0xcb378e5fb243a34f6745a0dbed4032a2b8292b467b03f771d14f747200e75967")
+// mnemonic "testrpc"
+web3.streamr.setKeyForAddress("0xa3d1f77acff0060f7213d7bf3c7fec78df847de1", "0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0")
+web3.streamr.setKeyForAddress("0x4178babe9e5148c6d5fd431cd72884b07ad855a0", "0xe5af7834455b7239881b85be89d905d6881dcb4751063897f12be1b0dd546bdb")
 
 // testnet accounts
 web3.streamr.setKeyForAddress("0x9e3d69305da51f34ee29bfb52721e3a824d59e69", "0xf27470af84d6c0a793d08a549e10baa99c29e9445cec400b0038966cf2730551")

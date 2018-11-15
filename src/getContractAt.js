@@ -23,7 +23,7 @@ function getContractAt(address, networkName) {
     var url = `${serverUrl}/api?module=contract&action=getabi&address=${address}`//&apikey=${API_KEY}`
     return rest.get(url).then((response) => {
         console.log(`getContractAt: Response from ${url}: ${response.data}`)
-        if (response.data.result == "") {
+        if (response.data.status !== "1") {
             return {address}
         } else {
             return {address, abi: JSON.parse(response.data.result)}

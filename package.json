@@ -26,6 +26,8 @@
   },
   "devDependencies": {
     "cli-table": "^0.3.1",
+    "ganache-cli": "^6.1.8",
+    "mocha": "^5.2.0",
     "restler": "^3.4.0"
   }
 }
