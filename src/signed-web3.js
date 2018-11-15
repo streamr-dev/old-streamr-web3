@@ -18,7 +18,7 @@ signed_web3.streamr = {setKeyForAddress, signTransaction}
 module.exports = signed_web3
 
 function signTransaction(rawTx) {
-    const key = keys[rawTx.from]
+    const key = keys[rawTx.from.toLowerCase()]
     if (!key) { throw new Error("Missing key for " + rawTx.from) }
     console.log(`signing ${JSON.stringify(rawTx)} with ${key}`)
     return sign(rawTx, key)
@@ -26,7 +26,7 @@ function signTransaction(rawTx) {
 
 const keys = {}
 function setKeyForAddress(address, key) {
-    keys[address] = key
+    keys[address.toLowerCase()] = key
 }
 
 // ethjs-provider-signer only implements sendAsync below, so here's its sync version
