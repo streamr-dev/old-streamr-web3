@@ -1,0 +1,1 @@
+env ETHEREUM_SERVER_URL=https://ropsten.infura.io/ PORT=3000 npm run start

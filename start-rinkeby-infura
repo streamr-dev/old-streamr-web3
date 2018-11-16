@@ -1,0 +1,1 @@
+env ETHEREUM_SERVER_URL=https://rinkeby.infura.io/ PORT=3001 npm run start

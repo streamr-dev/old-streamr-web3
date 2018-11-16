@@ -15,8 +15,8 @@ Engine-and-Editor's Ethereum modules require this service to be active in order 
 Project uses npm for package management. We provide sensible default configurations for IntelliJ IDEA and VSCode but project can be developed with other IDEs as well.
 
 - Install npm dependencies with `npm install`
-- Run it with `./start` if your Ethereum client is running on the same machine
-- Otherwise specify `ETHEREUM_SERVER_URL` and `PORT` in environment variables and run `npm run start`
+- Specify `ETHEREUM_SERVER_URL` and `PORT` in environment variables and run `npm run start`
+- OR run it with `./start-rinkeby-local`, `./start-rinkeby-infura`, `./start-ropsten-local`, `./start-ropsten infura` depending on your needs
 
 ## Running tests
 
