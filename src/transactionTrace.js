@@ -49,8 +49,8 @@ function getInternalTransfers(provider, txHash, txTo) {
                 break
             }
             case "CREATE": {
-                // TODO: report transfer
-                const etherSent = parseInt(step.stack[step.stack.length - 1], 16)
+                // TODO: report transfer after address is known
+                // const etherSent = parseInt(step.stack[step.stack.length - 1], 16)
                 stack.push({address: "unknown"})
                 break
             }

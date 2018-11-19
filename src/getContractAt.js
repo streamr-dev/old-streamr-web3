@@ -1,12 +1,11 @@
-var _ = require("lodash")
-var rest = require("restling");
+var rest = require("restling")
 
 const web3 = require("./signed-web3")
 
 // Get one from https://etherscan.io/myapikey (testnet seems to work without)
 //const API_KEY = process.env.ETHERSCAN_API_KEY
 
-etherscanServer = {
+const etherscanServer = {
     undefined: "https://api.etherscan.io",
     "mainnet": "https://api.etherscan.io",
     "rinkeby": "https://rinkeby.etherscan.io",

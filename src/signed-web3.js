@@ -31,7 +31,7 @@ function setKeyForAddress(address, key) {
 
 // ethjs-provider-signer only implements sendAsync below, so here's its sync version
 function send(payload) {
-    if (payload.method !== 'eth_sendTransaction') {
+    if (payload.method !== "eth_sendTransaction") {
         return raw_httpProvider.send(payload)
     }
 
@@ -50,7 +50,7 @@ function send(payload) {
     return raw_httpProvider.send({
         id: payload.id,
         jsonrpc: payload.jsonrpc,
-        method: 'eth_sendRawTransaction',
+        method: "eth_sendRawTransaction",
         params: [signedHexPayload]
     })
 }
@@ -68,10 +68,8 @@ function getNonce(account) {
 }
 
 function sendAsync(payload, callback) {
-    // eslint-disable-line
-    var self = this;
-    if (payload.method !== 'eth_sendTransaction') {
-        raw_httpProvider.sendAsync(payload, callback);
+    if (payload.method !== "eth_sendTransaction") {
+        raw_httpProvider.sendAsync(payload, callback)
         return
     }
 
@@ -94,7 +92,7 @@ function sendAsync(payload, callback) {
     raw_httpProvider.sendAsync({
         id: payload.id,
         jsonrpc: payload.jsonrpc,
-        method: 'eth_sendRawTransaction',
+        method: "eth_sendRawTransaction",
         params: [signedHexPayload]
-    }, callback);
+    }, callback)
 }

@@ -101,7 +101,7 @@ function transactionPromise(from, to, abi, getTransaction) {
             // if for some reason tr won't come out AS IT SHOULD, fall back to checking every time a new block comes out
             console.log("Waiting for receipt...")
             return new Promise((done, fail) => {
-                const filter = web3.eth.filter("latest").watch((e, block) => {
+                const filter = web3.eth.filter("latest").watch(() => {
                     console.log("Still waiting for receipt...")
                     const tr = web3.eth.getTransactionReceipt(tx)
                     if (tr) {

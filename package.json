@@ -3,13 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "lint": "./node_modules/.bin/eslint src",
+    "test-server": "./node_modules/.bin/ganache-cli -m testrpc",
+    "test": "./node_modules/.bin/mocha"
   },
   "dependencies": {
     "bignumber.js": "^4.0.1",
     "bluebird": "^3.4.7",
     "body-parser": "~1.15.2",
     "cookie-parser": "~1.4.3",
+    "eslint": "^5.9.0",
     "ethjs-signer": "^0.1.1",
     "express": "~4.14.0",
     "jade": "~1.11.0",
