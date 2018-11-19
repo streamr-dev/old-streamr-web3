@@ -6,7 +6,7 @@
     "start": "node ./bin/www",
     "lint": "./node_modules/.bin/eslint src",
     "test-server": "./node_modules/.bin/ganache-cli -m testrpc",
-    "test": "./node_modules/.bin/mocha"
+    "test": "./node_modules/.bin/mocha --timeout 10000"
   },
   "dependencies": {
     "bignumber.js": "^4.0.1",
@@ -17,7 +17,6 @@
     "ethjs-signer": "^0.1.1",
     "express": "~4.14.0",
     "jade": "~1.11.0",
-    "lodash": "^4.17.4",
     "morgan": "~1.7.0",
     "morgan-body": "^0.9.5",
     "restling": "^0.9.1",
@@ -26,6 +25,7 @@
     "web3": "0.18.2"
   },
   "devDependencies": {
+    "lodash": ">=4.17.5",
     "cli-table": "^0.3.1",
     "ganache-cli": "^6.1.8",
     "mocha": "^5.2.0",
