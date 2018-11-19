@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - "9.5.0"
+before_install:
+  - "npm i -g npm@6.0.1"
+branches:
+  only:
+    - /.*/
+jobs:
+  include:
+    - script:
+        - "npm run lint"
+      stage: "lint"
+    - script:
+        - "npm run test-server &"
+        - "npm run test"
+      stage: "unit tests"

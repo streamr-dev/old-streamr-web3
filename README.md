@@ -22,12 +22,12 @@ Project uses npm for package management. We provide sensible default configurati
 
 First console window
 ```
-./node_modules/.bin/ganache-cli -m testrpc
+npm run test-server
 ```
 
 Second console window
 ```
-./node_modules/.bin/mocha
+npm run test
 ```
 
 ## Publishing
