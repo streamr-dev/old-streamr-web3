@@ -17,6 +17,7 @@ contract Test {
 
 describe("compileContracts", () => {
     it("should return correct ABI", () => {
+        this.timeout(10000);
         var {contracts, errors} = compileContracts(TEST_CODE)
         assert.equal(contracts.length, 1)
         assert.equal(errors.length, 0)

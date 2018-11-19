@@ -13,6 +13,5 @@ jobs:
       stage: "lint"
     - script:
         - "npm run test-server &"
-        - "sleep 3"
         - "npm run test"
       stage: "unit tests"
