@@ -15,3 +15,15 @@ jobs:
         - "npm run test-server &"
         - "npm run test"
       stage: "unit tests"
+    - stage: Build docker (dev)
+      if: tag IS blank
+      install: true
+      env:
+        - OWNER=streamr
+        - IMAGE_NAME=streamr-web3
+        - TAG=dev
+      script:
+        - docker build -t $OWNER/$IMAGE_NAME:$TAG .
+      deploy:
+        - provider: script
+          script: bash .travis_scripts/deploy_docker.sh staging
