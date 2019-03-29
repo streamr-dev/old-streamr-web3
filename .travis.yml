@@ -1,29 +1,33 @@
 language: node_js
 node_js:
-  - "9.5.0"
+- 9.5.0
 before_install:
-  - "npm i -g npm@6.0.1"
+- npm i -g npm@6.0.1
 branches:
   only:
-    - /.*/
+  - "/.*/"
 jobs:
   include:
-    - script:
-        - "npm run lint"
-      stage: "lint"
-    - script:
-        - "npm run test-server &"
-        - "npm run test"
-      stage: "unit tests"
-    - stage: Build docker (dev)
-      if: tag IS blank
-      install: true
-      env:
-        - OWNER=streamr
-        - IMAGE_NAME=streamr-web3
-        - TAG=dev
-      script:
-        - docker build -t $OWNER/$IMAGE_NAME:$TAG .
-      deploy:
-        - provider: script
-          script: bash .travis_scripts/deploy_docker.sh staging
+  - script:
+    - npm run lint
+    stage: lint
+  - script:
+    - npm run test-server &
+    - npm run test
+    stage: unit tests
+  - stage: Build docker (dev)
+    if: tag IS blank
+    install: true
+    env:
+    - OWNER=streamr
+    - IMAGE_NAME=streamr-web3
+    - TAG=dev
+    script:
+    - docker build -t $OWNER/$IMAGE_NAME:$TAG .
+    deploy:
+    - provider: script
+      script: bash .travis_scripts/deploy_docker.sh staging
+env:
+  global:
+  - secure: pQdwSnUFlXHDbxOazrpDlNkeD+geLg/sGyG2RN8PU3Bl/hC6fDZIEMOQkOxAM0F9ubxVxHdmHjXtFBuLaiUkFfDtMSWYynaK4720ddu/iHa3Z3YWCtkISKm784gOj5DcTeEg22AsikyVATa4spAYsNlQrhmnYcdFyo4spYRq7SGVouYblsk6ug1sefdqr6KbKQCs9BUAqjBVFXTjMe3hB6IiR+ODToJcBvx6Di56dMcO/7Px2B5arQ40ADFi0t019LoHHUOreHssO1E/xyHX1CCocwLx/II0nqZOaeyzeGJLJuTtKIIXLD6XuGRTY+Kavu4L8x0DmY5d9HwIf5ixKbwDFvdLnVqMMuHoI9MOXmBf3q0ckVqqtScF1rUh9W2QG3+YKfRUP+xw25FK0jwG8y1rD8Sz/YAP2FtvUl6RPVOFcYBx2973Vy22RHIGQoZFKhL4BR53pYAUo7NV5DBfjhwm9eHsIlmHZyXdaj9W4BuZOZ9CoBK81S/9G1BM7bveu26kaJ5vnJb5NTZTrY7jRduWmDdzWF6aM3G9ytRfeeDrqJ3Ga36xfvZcJR1iFSXcj8lPaq0BxhPI2pkVj/RLgvIIxdGTj/ifDXLwMI6C+B00ui6QoG4qiEhv69YP9yVom+z9VSEyjkUhNnSuYZn5j6BPrR8RdU2TESGZx5zAOxI=
+  - secure: ILHzvyFqsxWgKUlVYKvyMZxP13aZB72n/9L7Ltq78NSZKgf11KD5en7r0Ola66sfCb0/Y4SUeu0BNE85aAbRMQWz9jtTuPFATUctGuKOrQoSpWjhKm5CR73gXjNiZFGu3mWljN9vYh4gMvqPJuadmLM1efpUUtp0Wq0oj77wqEqbcu0CJO8u30phQd8CF93LE7dxNKBoCGgVKY1lz+gKT7zDcwM6vv2tlVhBJbQyhRZnS+fJ8usVgzIZkMw25CmzhNl1egwleul4+9DsQL2YvJ3ErQjBei/Vbw+l/V/xMWE5DyS50zXFXvYQ+taaRlRIgd4493v26e5ctB07rpfxBq5Tt4sjolGcEn9NOf5LS6cBqDbBq2BS91xLRPGo6nEanoOmbnQL56MLYbnUd4EDcjMxuqs/5ST6FPBuFLTNCoUl0UyJWgLJlmItjvuWWeL5Fw6D6rvsfFtA8maFqMWGKJX0OVB4TmqRMOOZ1IujjMI8rkC6A9Z+TTTr4TDnZ7xXWrB1ozH/onRr9iw9q5ZCmazynAOD6V4ghmNAZObAmQER+Ze0t5GfRVCP8OXft7+nJTHLTS8qnCRXpVkIABzWugN6uEfW+IXrGkVlYCdUBEgq9o7Yd/p+91h5HuXG2TxrKL0IDYxnjRgqP639l9bz1RyfcPT7V4sbR0Nxozkb8OM=
