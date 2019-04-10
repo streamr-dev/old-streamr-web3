@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="bin/www port 3001" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="project" path-to-js-file="bin/www" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="DEBUG" value="streamr-web3:*" />
+      <env name="PORT" value="3001" />
+      <env name="ETHERSCAN_API_KEY" value="EKGYIQ8GW3F96C1PQAP6UV3MW8M4R7AJAI" />
+      <env name="ETHEREUM_SERVER_URL" value="http://localhost:8545" />
+      <env name="ENABLE_KILLSWITCH" value="1" />
+    </envs>
+    <browser url="http://localhost:3000/" />
+    <method />
+  </configuration>
+</component>

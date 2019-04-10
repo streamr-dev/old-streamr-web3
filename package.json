@@ -21,8 +21,8 @@
     "morgan-body": "^0.9.5",
     "restling": "^0.9.1",
     "serve-favicon": "~2.3.0",
-    "solc": "^0.4.9",
-    "web3": "0.18.2"
+    "solc": "0.4.25",
+    "web3": "0.20.7"
   },
   "devDependencies": {
     "lodash": ">=4.17.5",

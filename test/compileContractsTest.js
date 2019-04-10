@@ -1,5 +1,6 @@
 var assert = require("assert")
-var {compileContracts, deployContracts} = require("../src/compileContracts")
+var compileContracts = require("../src/compileContracts")
+var deployContracts = require("../src/deployContracts")
 
 const web3 = require("../src/signed-web3")
 require("./setupTestKeys")

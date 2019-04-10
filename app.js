@@ -1,32 +1,18 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan-body');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+const {ethCall, ethSend, getEvents} = require("./src/ethCall")
+const compileContracts = require("./src/compileContracts")
+const deployContracts = require("./src/deployContracts")
+const getContractAt = require("./src/getContractAt")
+const web3 = require("./src/signed-web3")
 
-var {ethCall, ethSend, getEvents} = require("./src/ethCall")
-var {compileContracts, deployContracts} = require("./src/compileContracts")
-var getContractAt = require("./src/getContractAt")
-var web3 = require("./src/signed-web3")
+const express = require('express')
+const app = express()
 
-var app = express();
+const bodyParser = require('body-parser')
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: false}))
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
+const logger = require('morgan-body')
 logger(app)
-
-var router = express.Router()
-//router.use(interceptKey)
 
 // any api handler that uses (signed) sendTransaction needs to hand over the private key first
 function interceptKey(req, res, next) {
@@ -53,7 +39,7 @@ function responsePromise(res, handler, args) {
     })
 }
         
-router.post("/call", interceptKey, function (req, res, next) {
+app.post("/call", interceptKey, function (req, res) {
     return responsePromise(res, ethCall, [
         req.body.source, req.body.target,
         req.body.abi, req.body.function, req.body.arguments,
@@ -61,50 +47,41 @@ router.post("/call", interceptKey, function (req, res, next) {
     ])
 })
 
-router.post("/send", interceptKey, function (req, res, next) {
+app.post("/send", interceptKey, function (req, res) {
     return responsePromise(res, ethSend, [req.body.source, req.body.target, req.body.value, req.body.gasprice])
 })
 
-router.post("/events", function (req, res, next) {
+app.post("/events", function (req, res) {
     return responsePromise(res, getEvents, [req.body.abi, req.body.address, req.body.txHash])
 })
 
-router.post("/deploy", interceptKey, function (req, res, next) {
+app.post("/deploy", interceptKey, function (req, res) {
     return responsePromise(res, deployContracts, [req.body.code, req.body.args, req.body.source, req.body.value, req.body.gasprice])
 })
 
-router.get("/contract", function (req, res, next) {
+app.get("/contract", function (req, res) {
     return responsePromise(res, getContractAt, [req.query.at, req.query.network])
 })
 
-router.post("/compile", function (req, res, next) {
+app.post("/compile", function (req, res) {
     return responsePromise(res, compileContracts, [req.body.code])
 })
 
-
-/** Status page */
-router.get("/", function (req, res, next) {
-    res.render("index", {web3})
-});
-
-
-app.use('/', router);
+app.get("/", function (req, res) {
+    res.send({"status": "ok"})
+})
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
-});
+    const err = new Error('Not Found')
+    err.status = 404
+    next(err)
+})
 
 // error handler
-app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-    console.log(err)
+app.use(function (err, req, res) {
+    console.error(err)
     res.status(err.status || 500).send({errors: [err]})
-});
+})
 
-module.exports = app;
+module.exports = app
