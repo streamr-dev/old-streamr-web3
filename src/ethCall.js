@@ -59,7 +59,8 @@ function ethCall(from, to, abi, functionName, args, value, gas, gasPrice) {
     if (functionMetadata.constant) {
         const res = func.call(...modifiedArgs)
         console.log("Called " + functionName + ", got result " + JSON.stringify(res))
-        return Promise.resolve({results: wrapArray(res)})
+        const results = functionMetadata.outputs.length === 1 ? [res] : res
+        return Promise.resolve({ results })
     } else {
         return transactionPromise(from, to, abi, () => {
             let callParams = {from, value, gas}
@@ -204,10 +205,6 @@ function getEventsFromLogs(logs, abi, address) {
         return [event.name, allParamValues]
 
     }).filter().fromPairs().value()
-}
-
-function wrapArray(maybeArray) {
-    return _(maybeArray).isArray() ? maybeArray : [maybeArray]
 }
 
 module.exports = {ethCall, ethSend, getEvents, getEventsFromLogs}
