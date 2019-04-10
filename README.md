@@ -29,7 +29,7 @@ First console window
 npm run test-server
 ```
 
-Second console window
+Second console window (or optionally from IDEA the "run tests" run configuration)
 ```
 npm run test
 ```
